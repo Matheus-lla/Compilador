@@ -1,4 +1,4 @@
-build: clean init lexer.o
+build: init lexer.o
 	g++ -o target/lexer target/tmp/lexer.o
 
 lexer.o: 
@@ -10,5 +10,5 @@ init:
 clean:
 	rm -rf target
 
-run:
+test: 
 	./target/lexer < testes/teste1.mgol
