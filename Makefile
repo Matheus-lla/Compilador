@@ -2,7 +2,7 @@ build: init lexer.o
 	g++ -o target/lexer target/tmp/lexer.o
 
 lexer.o: 
-	g++ -o target/tmp/lexer.o src/libs/implementations/lexer.cpp -c -W -Wall -ansi -pedantic
+	g++ -o target/tmp/lexer.o src/lexer/lexer.cpp -c -W -Wall -ansi -pedantic
 
 init:
 	mkdir -p target/tmp

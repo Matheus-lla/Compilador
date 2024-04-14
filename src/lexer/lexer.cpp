@@ -4,38 +4,38 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-const int TRANSITION_TABLE[24][24] = {
-/*    ,  ;  (  )  +  -  /  *  <  =  >  "  \  {  }  L  $  D  _  .  e  E \n   estado final 1 para aceitacão
-      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22   23 */
-    { 1, 2, 3, 4, 5, 5, 5, 5, 6, 8, 9,10,-1,13,-1,16,17,18,-1,-1,16,16, 0,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1, 7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {10,10,10,10,10,10,10,10,10,10,10,12,11,10,10,10,10,10,10,10,10,10,-1,    0},
-    {10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {13,13,13,13,13,13,13,13,13,13,13,13,15,13,14,13,13,13,13,13,13,13,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,16,-1,16,16,-1,16,16,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,-1,19,21,21,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,-1,-1,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,21,21,-1,    1},
-    {-1,-1,-1,-1,23,23,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,22,-1,-1,-1,-1,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,22,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,22,-1,-1,-1,-1,-1,    0}
+const int TRANSITION_TABLE[24][30] = {
+/*    ,  ;  (  )  +  -  /  *  <  =  >  "  \  {  }  L  $  D  _  .  e  E \n  :  !  ?  [  ]  '   estado final 1 para aceitacão
+      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28    29 */
+    { 1, 2, 3, 4, 5, 5, 5, 5, 6, 8, 9,10,-1,13,-1,16,17,18,-1,-1,16,16, 0,-1,-1,-1,-1,-1,-1,    0},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1, 7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {10,10,10,10,10,10,10,10,10,10,10,12,11,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,    0},
+    {10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,    0},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {13,13,13,13,13,13,13,13,13,13,13,13,15,13,14,13,13,13,13,13,13,13,13,13,13,13,13,13,13,    0},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,    0},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,16,-1,16,16,-1,16,16,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,-1,19,21,21,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,21,21,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,23,23,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,22,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,22,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
+    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,22,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0}
 };
 
-const int FINAL_STATE = 23;
+const int FINAL_STATE = 29;
 
-const char TOKEN_CLASS[12][11] = {
+char TOKEN_CLASS[13][11] = {
     {"VIR"},
     {"PT_V"},
     {"AB_P"},
@@ -47,12 +47,13 @@ const char TOKEN_CLASS[12][11] = {
     {"COMENTARIO"},
     {"ID"},
     {"EOF_CLASS"},
-    {"NUM"}
+    {"NUM"},
+    {"ERRO"}
 };
 
 typedef struct TOKEN {
     char *lexema;
-    char token_class[11];
+    char *token_class;
 } TOKEN;
 
 
@@ -60,7 +61,8 @@ bool is_letter(char ch);
 bool is_number(char ch);
 int transition(int STATE, int SYMBOL);
 bool is_final(int STATE);
-void make_token(char *buffer, int STATE, bool valid);
+TOKEN make_last_token(char ch);
+TOKEN make_token(char *buffer, int STATE, bool valid);
 int get_symbol(char ch);
 
 int main(int argc,char *argv[]){
@@ -73,7 +75,7 @@ int main(int argc,char *argv[]){
     bool restore_pos = false;
     char buffer[50] = {'\0'};
     int i = 0;
-    int cont = 0;
+    TOKEN token;
 
     if(argc < 2){
         printf("Parametros invalidos!");
@@ -82,7 +84,7 @@ int main(int argc,char *argv[]){
 
     file = fopen(argv[1], "r");
 
-    while((ch = fgetc(file)) != EOF){
+    while((ch = fgetc(file)) != '$' && ch != EOF){
         if(restore_pos){
             fseek(file, file_position, SEEK_SET);
             ch = fgetc(file);
@@ -93,15 +95,6 @@ int main(int argc,char *argv[]){
             ch = fgetc(file);
         }
 
-        if(ch == '\\' and cont < 10){
-            cont++;
-            if (cont == 9)
-            {
-                break;
-            }
-            
-        }
-        
         file_position = ftell(file) - 1;
         
         SYMBOL = get_symbol(ch);
@@ -114,8 +107,9 @@ int main(int argc,char *argv[]){
 
             buffer[i] = '\0';
 
-            // printf("\ntoken -1 & ch |%c|\n", ch);
-            make_token(buffer, STATE, is_final(STATE));
+            token = make_token(buffer, STATE, is_final(STATE));
+            printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
+
             STATE = 0;
             i = 0;
         }
@@ -123,8 +117,9 @@ int main(int argc,char *argv[]){
             buffer[i++] = ch;
             buffer[i] = '\0';
 
-            // printf("\ntoken -2 & ch |%d| & state: %d\n", ch, STATE);
-            make_token(buffer, STATE, false);
+            token = make_token(buffer, STATE, false);
+            printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
+
             STATE = 0;
             i = 0;
         }
@@ -133,8 +128,10 @@ int main(int argc,char *argv[]){
             STATE = NEXT_STATE;
         }
         
-        // printf("character: |%c| || state: %d\n", ch, STATE);
     }
+
+    token = make_last_token(ch);
+    printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
 
     fclose(file);
     return 0;
@@ -157,81 +154,123 @@ bool is_final(int STATE){
     return (TRANSITION_TABLE[STATE][FINAL_STATE]) ? true : false;
 }
 
-void make_token(char *buffer, int STATE, bool valid){
+TOKEN make_last_token(char ch){
+    char buffer[2];
+    int STATE; 
+    
+    if (ch == '$') {
+        buffer[0] = ch;
+        buffer[1] = '\0';
+        STATE = 17; 
+    }
+    else {
+        buffer[0] = ch;
+        buffer[1] = '\0';
+        STATE = false;
+    }
+    
+   return make_token(buffer, STATE, is_final(STATE));
+}
+
+TOKEN make_token(char *buffer, int STATE, bool valid){
+    TOKEN token;
+    
     if(!valid){
-        printf("token: ERRO & |%s|\n", buffer);
+        token.lexema = buffer;
+        token.token_class = TOKEN_CLASS[12];
+        return token;
     }
     else{
         switch (STATE){
         case 1:
-            printf("token: VIR & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[0];
+            return token;
             break;
         case 2:
-            printf("token: PT_V & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[1];
+            return token;
             break;
         case 3:
-            printf("token: AB_P & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[2];
+            return token;
             break;
         case 4:
-            printf("token: FC_P & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[3];
+            return token;
             break;
         case 5:
-            printf("token: OPM & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[4];
+            return token;
             break;
         case 6:
-            printf("token: OPR & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[5];
+            return token;
             break;
         case 7:
-            printf("token: RCB & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[6];
+            return token;
             break;
         case 8:
-            printf("token: OPR & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[5];
+            return token;
             break;
         case 9:
-            printf("token: OPR & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[5];
+            return token;
             break;
         case 12:
-            printf("token: Lit & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[7];
+            return token;
             break;
         case 14:
-            printf("token: Comentario & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[8];
+            return token;
             break;
         case 16:
-            printf("token: ID & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[9];
+            return token;
             break;
         case 17:
-            printf("token: EOF & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[10];
+            return token;
             break;
         case 18:
-            printf("token: Num & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[11];
+            return token;
             break;
         case 20:
-            printf("token: Num & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[11];
+            return token;
             break;
         case 22:
-            printf("token: Num & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[11];
+            return token;
             break;
         default:
-            printf("token: ERRO & |%s|\n", buffer);
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[12];
+            return token;
             break;
         }   
     }
-   
 }
 
-    // {"VIR"},
-    // {"PT_V"},
-    // {"AB_P"},
-    // {"FC_P"},
-    // {"OPM"},
-    // {"OPR"},
-    // {"RCB"},
-    // {"LIT"},
-    // {"COMENTARIO"},
-    // {"ID"},
-    // {"EOF_CLASS"},
-    // {"NUM"}
-    
 int get_symbol(char ch){
     if(is_number(ch)){
         return 17;
@@ -276,9 +315,9 @@ int get_symbol(char ch){
         case '.':
             return 19;
         case 'e':
-            return 15;
+            return 20;
         case 'E':
-            return 15;
+            return 21;
         case '\n':
             return 22;
         case '\r':
@@ -291,6 +330,18 @@ int get_symbol(char ch){
             return 22;
         case '\f':
             return 22;
+        case ':':           
+            return 23;
+        case '!':
+            return 24;
+        case '?':
+            return 25;
+        case '[':
+            return 26;
+        case ']':
+            return 28;
+        case '\'':
+            return 28;
         default:
             return -2;
         }
