@@ -10,5 +10,8 @@ init:
 clean:
 	rm -rf target
 
-test: 
-	./target/lexer < testes/teste1.mgol
+test_1: 
+	./target/lexer testes/teste1.mgol
+
+test_2:
+	./target/lexer testes/teste2.mgol
