@@ -55,11 +55,6 @@ char skip_ws(char ch, int STATE, FILE *file){
 
 int get_symbol(char ch){
     if(is_number(ch)){
-
-
-
-
-    
         return 17;
     }else if(is_letter(ch)){
         return 15;
@@ -241,4 +236,14 @@ TOKEN make_token(std::string buffer, int STATE){
             return token;
             break;
     }   
+}
+
+TOKEN make_palavra_reservada(std::string buffer){
+    TOKEN token;
+
+    token.lexema = buffer;
+    token.token_class = buffer;
+    token.type = buffer;
+
+    return token;
 }

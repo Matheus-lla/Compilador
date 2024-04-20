@@ -53,14 +53,14 @@ const int TRANSITION_TABLE[22][30] = {
 
 const int FINAL_STATE = 29;
 
-char skip_ws(char ch, int STATE, FILE *file);
 TOKEN SCANNER(FILE *file);
+char skip_ws(char ch, int STATE, FILE *file);
+int get_symbol(char ch);
 bool is_letter(char ch);
 bool is_number(char ch);
 int transition(int STATE, int SYMBOL);
-bool is_final(int STATE);
 TOKEN make_token(std::string buffer, int STATE);
-int get_symbol(char ch);
+TOKEN make_palavra_reservada(std::string buffer);
 
 #endif 
 
