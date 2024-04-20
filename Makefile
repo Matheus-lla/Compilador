@@ -1,8 +1,5 @@
-build: init lexer.o
-	g++ -o target/lexer target/tmp/lexer.o
-
-lexer.o: 
-	g++ -o target/tmp/lexer.o src/lexer/lexer.cpp -c -W -Wall -ansi -pedantic
+build: clean init 
+	g++ -o target/main src/main.cpp src/lexer/lexer.cpp
 
 init:
 	mkdir -p target/tmp
@@ -10,8 +7,19 @@ init:
 clean:
 	rm -rf target
 
-test_1: 
-	./target/lexer testes/teste1.mgol
+test.all: test_comentario test_id test_lit test_num test_professora 
 
-test_2:
-	./target/lexer testes/teste2.mgol
+test.comentario:
+	./target/main testes/teste_comentario.mgol
+
+test.id:
+	./target/main testes/teste_id.mgol
+
+test.lit:
+	./target/main testes/teste_lit.mgol
+
+test.num:
+	./target/main testes/teste_num.mgol
+
+test.professora: 
+	./target/main testes/teste_professora.mgol

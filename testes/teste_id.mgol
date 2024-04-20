@@ -1,0 +1,8 @@
+inicio
+    varinicio
+        literal testeDeIdAAAA,B;
+        inteiro B;
+        inteiro D;
+        real C ;
+    varfim;
+fim

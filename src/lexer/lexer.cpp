@@ -4,132 +4,163 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-const int TRANSITION_TABLE[24][30] = {
-/*    ,  ;  (  )  +  -  /  *  <  =  >  "  \  {  }  L  $  D  _  .  e  E \n  :  !  ?  [  ]  '   estado final 1 para aceitacão
-      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28    29 */
-    { 1, 2, 3, 4, 5, 5, 5, 5, 6, 8, 9,10,-1,12,-1,14,15,16,-1,-1,14,14, 0,-1,-1,-1,-1,-1,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1, 7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {10,10,10,10,10,10,10,10,10,10,10,11,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {12,12,12,12,12,12,12,12,12,12,12,12,12,12,13,12,12,12,12,12,12,12,12,12,12,12,12,12,12,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,14,-1,14,14,-1,14,14,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,16,-1,17,19,19,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,-1,-1,19,19,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,21,21,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0}
+#include "lexer.h"
+
+const char* TOKEN_CLASS[] = {
+    "VIR",
+    "PT_V",
+    "AB_P",
+    "FC_P",
+    "OPM",
+    "OPR",
+    "RCB",
+    "LIT",
+    "COMENTARIO",
+    "ID",
+    "EOF_CLASS",
+    "NUM",
+    "ERRO"
 };
 
-const int FINAL_STATE = 29;
-
-char TOKEN_CLASS[13][11] = {
-    {"VIR"},
-    {"PT_V"},
-    {"AB_P"},
-    {"FC_P"},
-    {"OPM"},
-    {"OPR"},
-    {"RCB"},
-    {"LIT"},
-    {"COMENTARIO"},
-    {"ID"},
-    {"EOF_CLASS"},
-    {"NUM"},
-    {"ERRO"}
-};
-
-typedef struct TOKEN {
-    char *lexema;
-    char *token_class;
-} TOKEN;
-
-
-bool is_letter(char ch);
-bool is_number(char ch);
-int transition(int STATE, int SYMBOL);
-bool is_final(int STATE);
-TOKEN make_token(char *buffer, int STATE, bool valid);
-int get_symbol(char ch);
-
-int main(int argc,char *argv[]){
-    FILE *file;
-    long file_position;
-    char ch;
-    int STATE = 0;
-    int NEXT_STATE = 0;
-    int SYMBOL;
-    bool restore_pos = false;
-    char buffer[50] = {'\0'};
-    int i = 0;
+TOKEN SCANNER(FILE *file){
+    static int linha = 0;
+    static int coluna = 0;
+    
     TOKEN token;
+    int STATE = 0;
+    int SYMBOL;
+    int NEXT_STATE;
+    char ch;
+    std::string buffer;
+    int i = 0;
 
-    if(argc < 2){
-        printf("Parametros invalidos!");
-        return 1;
-    }
+    while (!(feof(file))) {
+        if ((ch = fgetc(file)) != EOF) {
+            while ((' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch || '\f' == ch || '\v' == ch) && STATE == 0) {
+                ch = fgetc(file);
+            }
 
-    file = fopen(argv[1], "r");
-
-    while((ch = fgetc(file)) != EOF){
-        if(restore_pos){
-            fseek(file, file_position, SEEK_SET);
-            ch = fgetc(file);
-            restore_pos = false;
-        }
-
-        while ((' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch || '\f' == ch || '\v' == ch) && STATE == 0 && restore_pos != true) {
-            ch = fgetc(file);
-        }
-
-        file_position = ftell(file) - 1;
-        
-        SYMBOL = get_symbol(ch);
-        if(SYMBOL != -2){
+            SYMBOL = get_symbol(ch);
+            // if(SYMBOL != -2){
             NEXT_STATE = transition(STATE, SYMBOL);
-        } else NEXT_STATE = -2;
+            // } else NEXT_STATE = -2;
 
-        if(NEXT_STATE == -1){
-            restore_pos = true;
+            printf("aqui tem o char: |%c| $ next state: %d\n", ch, NEXT_STATE);
 
-            buffer[i] = '\0';
+            if(NEXT_STATE == -1){
+                buffer += '\0';
 
-            token = make_token(buffer, STATE, is_final(STATE));
-            printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
+                printf("buffer: |%s|\n", buffer.c_str());
+                token = make_token((char*) buffer.c_str(), STATE);
+                fseek(file, ftell(file)-1, SEEK_SET);
+                
+                printf("lexema: %s | class: %s | sizeof: %lu\n", token.lexema.c_str(), token.token_class, sizeof(token.lexema));
 
-            STATE = 0;
-            i = 0;
+                return token;
+                if (token.token_class != TOKEN_CLASS[12]){
+                    // restore_pos = true;
+                }
+                STATE = 0;
+                i = 0;
+            }
+            // else if (NEXT_STATE == -2){
+            //     buffer[i++] = ch;
+            //     buffer[i] = '\0';
+
+            //     token = make_token(buffer, STATE);
+            //     fseek(file, ftell(file)-1, SEEK_SET);
+                
+            //     return token;
+            //     printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
+
+            //     STATE = 0;
+            //     i = 0;
+            // }
+            else{
+                buffer += ch;
+                STATE = NEXT_STATE;
+            }            
+
+            if (ch == '\n'){
+                linha++;
+                coluna = 0;
+            }
+            coluna++;
         }
-        else if (NEXT_STATE == -2){
-            buffer[i++] = ch;
-            buffer[i] = '\0';
-
-            token = make_token(buffer, STATE, false);
-            printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
-
-            STATE = 0;
-            i = 0;
-        }
-        else{
-            buffer[i++] = ch;
-            STATE = NEXT_STATE;
-        }
-        
     }
 
-    fclose(file);
-    return 0;
+    return token;
 }
+
+// int main(int argc,char *argv[]){
+//     FILE *file;
+//     long file_position;
+//     char ch;
+//     int STATE = 0;
+//     int NEXT_STATE = 0;
+//     int SYMBOL;
+//     bool restore_pos = false;
+//     char buffer[256] = {'\0'};
+//     int i = 0;
+//     int j = 0;
+//     TOKEN token;
+
+
+//     while((ch = fgetc(file)) != EOF and j < 1000){
+//         if(restore_pos){
+//             fseek(file, file_position, SEEK_SET);
+//             ch = fgetc(file);
+//             restore_pos = false;
+            
+//         }
+
+//         j++;
+
+//         while ((' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch || '\f' == ch || '\v' == ch) && STATE == 0 && restore_pos != true) {
+//             ch = fgetc(file);
+//         }
+
+//         file_position = ftell(file) - 1;
+        
+//         SYMBOL = get_symbol(ch);
+//         if(SYMBOL != -2){
+//             NEXT_STATE = transition(STATE, SYMBOL);
+//         } else NEXT_STATE = -2;
+
+//         // printf("aqui tem o char: |%c| $ next state: %d\n", ch, NEXT_STATE);
+
+//         if(NEXT_STATE == -1){
+//             buffer[i] = '\0';
+
+//             token = make_token(buffer, STATE);
+//             printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
+
+//             if (token.token_class != TOKEN_CLASS[12]){
+//                 restore_pos = true;
+//             }
+//             STATE = 0;
+//             i = 0;
+//         }
+//         else if (NEXT_STATE == -2){
+//             buffer[i++] = ch;
+//             buffer[i] = '\0';
+
+//             token = make_token(buffer, STATE);
+//             printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
+
+//             STATE = 0;
+//             i = 0;
+//         }
+//         else{
+//             buffer[i++] = ch;
+//             STATE = NEXT_STATE;
+//         }
+        
+//     }
+
+//     fclose(file);
+//     return 0;
+// }
 
 bool is_letter(char ch){
     char ch_upper = toupper(ch);
@@ -148,16 +179,10 @@ bool is_final(int STATE){
     return (TRANSITION_TABLE[STATE][FINAL_STATE]) ? true : false;
 }
 
-TOKEN make_token(char *buffer, int STATE, bool valid){
+TOKEN make_token(char *buffer, int STATE){
     TOKEN token;
     
-    if(!valid){
-        token.lexema = buffer;
-        token.token_class = TOKEN_CLASS[12];
-        return token;
-    }
-    else{
-        switch (STATE){
+    switch (STATE){
         case 1:
             token.lexema = buffer;
             token.token_class = TOKEN_CLASS[0];
@@ -223,7 +248,7 @@ TOKEN make_token(char *buffer, int STATE, bool valid){
             token.token_class = TOKEN_CLASS[10];
             return token;
             break;
-        case 17:
+        case 16:
             token.lexema = buffer;
             token.token_class = TOKEN_CLASS[11];
             return token;
@@ -243,8 +268,7 @@ TOKEN make_token(char *buffer, int STATE, bool valid){
             token.token_class = TOKEN_CLASS[12];
             return token;
             break;
-        }   
-    }
+    }   
 }
 
 int get_symbol(char ch){
