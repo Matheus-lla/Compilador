@@ -1,0 +1,19 @@
+{isso e um comentario valido 1}
+inicio  {isso e um comentario valido 2}
+{isso e um comentario valido 3}
+    varinicio
+{isso e um comentario valido 4}
+    varfim;
+{isso e um comentario valido 5}
+{isso e um comentario valido com todos os caracteres do alfabeto
+
+    abcdefghijklmnopqrstuvxywz1234567890.,;/\<>=+-*_()$!:.[]'"?}
+fim
+{isso e um comentario valido 6}
+
+
+{daqui pra baixo deve retornar ERRO}
+{}}
+{@}
+{%}
+{#}

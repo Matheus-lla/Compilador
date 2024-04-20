@@ -1,250 +1,56 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-#include <ctype.h>
-#include <stdbool.h>
+#include "lexer.h"
 
-const int TRANSITION_TABLE[24][30] = {
-/*    ,  ;  (  )  +  -  /  *  <  =  >  "  \  {  }  L  $  D  _  .  e  E \n  :  !  ?  [  ]  '   estado final 1 para aceitacão
-      0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28    29 */
-    { 1, 2, 3, 4, 5, 5, 5, 5, 6, 8, 9,10,-1,12,-1,14,15,16,-1,-1,14,14, 0,-1,-1,-1,-1,-1,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1, 7,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {10,10,10,10,10,10,10,10,10,10,10,11,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {12,12,12,12,12,12,12,12,12,12,12,12,12,12,13,12,12,12,12,12,12,12,12,12,12,12,12,12,12,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,14,-1,14,14,-1,14,14,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,16,-1,17,19,19,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,18,-1,-1,19,19,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,21,21,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
-    {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0}
-};
-
-const int FINAL_STATE = 29;
-
-char TOKEN_CLASS[13][11] = {
-    {"VIR"},
-    {"PT_V"},
-    {"AB_P"},
-    {"FC_P"},
-    {"OPM"},
-    {"OPR"},
-    {"RCB"},
-    {"LIT"},
-    {"COMENTARIO"},
-    {"ID"},
-    {"EOF_CLASS"},
-    {"NUM"},
-    {"ERRO"}
-};
-
-typedef struct TOKEN {
-    char *lexema;
-    char *token_class;
-} TOKEN;
-
-
-bool is_letter(char ch);
-bool is_number(char ch);
-int transition(int STATE, int SYMBOL);
-bool is_final(int STATE);
-TOKEN make_token(char *buffer, int STATE, bool valid);
-int get_symbol(char ch);
-
-int main(int argc,char *argv[]){
-    FILE *file;
-    long file_position;
-    char ch;
+TOKEN SCANNER(FILE *file){
     int STATE = 0;
-    int NEXT_STATE = 0;
     int SYMBOL;
-    bool restore_pos = false;
-    char buffer[50] = {'\0'};
-    int i = 0;
-    TOKEN token;
-
-    if(argc < 2){
-        printf("Parametros invalidos!");
-        return 1;
-    }
-
-    file = fopen(argv[1], "r");
-
-    while((ch = fgetc(file)) != EOF){
-        if(restore_pos){
-            fseek(file, file_position, SEEK_SET);
-            ch = fgetc(file);
-            restore_pos = false;
-        }
-
-        while ((' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch || '\f' == ch || '\v' == ch) && STATE == 0 && restore_pos != true) {
-            ch = fgetc(file);
-        }
-
-        file_position = ftell(file) - 1;
-        
-        SYMBOL = get_symbol(ch);
-        if(SYMBOL != -2){
-            NEXT_STATE = transition(STATE, SYMBOL);
-        } else NEXT_STATE = -2;
-
-        if(NEXT_STATE == -1){
-            restore_pos = true;
-
-            buffer[i] = '\0';
-
-            token = make_token(buffer, STATE, is_final(STATE));
-            printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
-
-            STATE = 0;
-            i = 0;
-        }
-        else if (NEXT_STATE == -2){
-            buffer[i++] = ch;
-            buffer[i] = '\0';
-
-            token = make_token(buffer, STATE, false);
-            printf("lexema: %s | class: %s\n", token.lexema, token.token_class);
-
-            STATE = 0;
-            i = 0;
-        }
-        else{
-            buffer[i++] = ch;
-            STATE = NEXT_STATE;
-        }
-        
-    }
-
-    fclose(file);
-    return 0;
-}
-
-bool is_letter(char ch){
-    char ch_upper = toupper(ch);
-    return (ch_upper >= 'A' and ch_upper <= 'Z' and ch_upper != 'E') ? true : false;
-}
-
-bool is_number(char ch){
-    return (ch >= '0' and ch <= '9') ? true : false;
-}
-
-int transition(int STATE, int SYMBOL){
-    return TRANSITION_TABLE[STATE][SYMBOL];
-}
-
-bool is_final(int STATE){
-    return (TRANSITION_TABLE[STATE][FINAL_STATE]) ? true : false;
-}
-
-TOKEN make_token(char *buffer, int STATE, bool valid){
-    TOKEN token;
+    int NEXT_STATE;
     
-    if(!valid){
-        token.lexema = buffer;
-        token.token_class = TOKEN_CLASS[12];
-        return token;
+    char ch;
+    std::string buffer;
+
+    static int linha = 0;
+    static int coluna = 0;
+
+    while (!(feof(file))) {
+        if ((ch = fgetc(file)) != EOF) {
+            ch = skip_ws(ch, STATE, file);
+
+            SYMBOL = get_symbol(ch);
+            NEXT_STATE = transition(STATE, SYMBOL);
+
+            if(NEXT_STATE == -1){
+                buffer += '\0';
+                fseek(file, ftell(file)-1, SEEK_SET);
+                break;
+            }
+            else{ 
+                if (NEXT_STATE == -2){
+                    buffer += ch;
+                    buffer += '\0';
+                    break;
+                }
+                else{
+                    buffer += ch;
+                    STATE = NEXT_STATE;
+                }            
+            }
+
+            if (ch == '\n'){
+                linha++;
+                coluna = 0;
+            }
+            coluna++;
+        }
     }
-    else{
-        switch (STATE){
-        case 1:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[0];
-            return token;
-            break;
-        case 2:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[1];
-            return token;
-            break;
-        case 3:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[2];
-            return token;
-            break;
-        case 4:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[3];
-            return token;
-            break;
-        case 5:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[4];
-            return token;
-            break;
-        case 6:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[5];
-            return token;
-            break;
-        case 7:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[6];
-            return token;
-            break;
-        case 8:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[5];
-            return token;
-            break;
-        case 9:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[5];
-            return token;
-            break;
-        case 11:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[7];
-            return token;
-            break;
-        case 13:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[8];
-            return token;
-            break;
-        case 14:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[9];
-            return token;
-            break;
-        case 15:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[10];
-            return token;
-            break;
-        case 17:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[11];
-            return token;
-            break;
-        case 18:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[11];
-            return token;
-            break;
-        case 20:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[11];
-            return token;
-            break;
-        default:
-            token.lexema = buffer;
-            token.token_class = TOKEN_CLASS[12];
-            return token;
-            break;
-        }   
+
+    return make_token((char*) buffer.c_str(), STATE);
+}
+
+char skip_ws(char ch, int STATE, FILE *file){
+    while ((' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch || '\f' == ch || '\v' == ch) && STATE == 0) {
+        ch = fgetc(file);
     }
+    return ch;
 }
 
 int get_symbol(char ch){
@@ -319,7 +125,125 @@ int get_symbol(char ch){
         case '\'':
             return 28;
         default:
-            return -2;
+            return -1;
         }
     }
+}
+
+bool is_letter(char ch){
+    char ch_upper = toupper(ch);
+    return (ch_upper >= 'A' and ch_upper <= 'Z' and ch_upper != 'E') ? true : false;
+}
+
+bool is_number(char ch){
+    return (ch >= '0' and ch <= '9') ? true : false;
+}
+
+int transition(int STATE, int SYMBOL){
+    if (SYMBOL == -1) {
+        return (STATE == 0) ? -2: -1;
+    }
+    return TRANSITION_TABLE[STATE][SYMBOL];
+}
+
+TOKEN make_token(std::string buffer, int STATE){
+    TOKEN token;
+    
+    switch (STATE){
+        case 1:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[0];
+            return token;
+            break;
+        case 2:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[1];
+            return token;
+            break;
+        case 3:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[2];
+            return token;
+            break;
+        case 4:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[3];
+            return token;
+            break;
+        case 5:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[4];
+            return token;
+            break;
+        case 6:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[5];
+            return token;
+            break;
+        case 7:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[6];
+            return token;
+            break;
+        case 8:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[5];
+            return token;
+            break;
+        case 9:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[5];
+            return token;
+            break;
+        case 11:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[7];
+            return token;
+            break;
+        case 13:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[8];
+            return token;
+            break;
+        case 14:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[9];
+            return token;
+            break;
+        case 15:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[10];
+            return token;
+            break;
+        case 16:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[11];
+            return token;
+            break;
+        case 18:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[11];
+            return token;
+            break;
+        case 20:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[11];
+            return token;
+            break;
+        default:
+            token.lexema = buffer;
+            token.token_class = TOKEN_CLASS[12];
+            return token;
+            break;
+    }   
+}
+
+TOKEN make_palavra_reservada(std::string buffer){
+    TOKEN token;
+
+    token.lexema = buffer;
+    token.token_class = buffer;
+    token.type = buffer;
+
+    return token;
 }
