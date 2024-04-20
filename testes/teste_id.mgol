@@ -1,8 +1,15 @@
 inicio
     varinicio
-        literal testeDeIdAAAA,B;
-        inteiro B;
-        inteiro D;
-        real C ;
-    varfim;
+        literal teste; 
+        real    valor_valido;
+        inteiro id123;
+        real    var_123_valida;
+        literal e_va_123;
+        inteiro val_;
+
+        inteiro _nao_valido;
+        real 123_invalido;
+        inteiro 456naosei;
+        inteiro
+    varfim
 fim

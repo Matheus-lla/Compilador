@@ -4,16 +4,30 @@
 
 typedef struct TOKEN {
     std::string lexema;
-    const char *token_class;
-    char *type;
+    std::string token_class;
+    std::string type;
 } TOKEN;
 
-const int FINAL_STATE = 29;
+const std::string TOKEN_CLASS[] = {
+    "VIR",
+    "PT_V",
+    "AB_P",
+    "FC_P",
+    "OPM",
+    "OPR",
+    "RCB",
+    "LIT",
+    "COMENTARIO",
+    "ID",
+    "EOF_CLASS",
+    "NUM",
+    "ERRO"
+};
 
 const int TRANSITION_TABLE[22][30] = {
 /*    ,  ;  (  )  +  -  /  *  <  =  >  "  \  {  }  L  $  D  _  .  e  E \n  :  !  ?  [  ]  '   estado final 1 para aceitacão
       0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28    29 */
-    { 1, 2, 3, 4, 5, 5, 5, 5, 6, 8, 9,10,-1,12,-1,14,15,16,-1,-1,14,14, 0,-1,-1,-1,-1,-1,-1,    0},
+    { 1, 2, 3, 4, 5, 5, 5, 5, 6, 8, 9,10,-2,12,-2,14,15,16,-2,-2,14,14, 0,-2,-2,-2,-2,-2,-2,    0},
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    1},
@@ -37,14 +51,15 @@ const int TRANSITION_TABLE[22][30] = {
     {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,20,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,    0}
 };
 
+const int FINAL_STATE = 29;
 
-
+char skip_ws(char ch, int STATE, FILE *file);
 TOKEN SCANNER(FILE *file);
 bool is_letter(char ch);
 bool is_number(char ch);
 int transition(int STATE, int SYMBOL);
 bool is_final(int STATE);
-TOKEN make_token(char *buffer, int STATE);
+TOKEN make_token(std::string buffer, int STATE);
 int get_symbol(char ch);
 
 #endif 
