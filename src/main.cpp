@@ -9,7 +9,7 @@ int main(int argc, char* argv[]){
     FILE *file;
     char ch;
     TOKEN token;
-    char *str;
+    TOKEN token_aux;
 
     init_symbols_table(&SYMBOLS_TABLE);
 
@@ -17,13 +17,23 @@ int main(int argc, char* argv[]){
 
     while (!(feof(file))){
         token = SCANNER(file);
-        if (token.token_class == TOKEN_CLASS[10]){
-            SYMBOLS_TABLE.find(token.lexema);
+        
+        if (token.token_class == TOKEN_CLASS[9]){
+            if (auto search = SYMBOLS_TABLE.find(token.lexema); search == SYMBOLS_TABLE.end()){
+                SYMBOLS_TABLE.insert({token.lexema, token});
+                printf("print novo id: |%s| - |%s| - |%s|\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str());
+            }
+            else{
+                if (search->second.lexema == search->second.token_class and search->second.token_class == search->second.type){
+                    printf("print reservada: |%s| - |%s| - |%s|\n", search->second.lexema.c_str(), search->second.token_class.c_str(), search->second.type.c_str());
+                }
+            }
+            
         }
          
     }
     
-    printf("%s, %s, %s", SYMBOLS_TABLE.at("inicio").lexema.c_str(), SYMBOLS_TABLE.at("varinicio").token_class.c_str(), SYMBOLS_TABLE.at("fim").type.c_str());
+
 
 
     return 0;
