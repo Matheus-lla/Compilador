@@ -16,6 +16,7 @@ int main(int argc, char* argv[]){
     file = fopen(argv[1], "r");
 
     while (!(feof(file))){
+        printf("teste");
         token = SCANNER(file);
         
         if (token.token_class == TOKEN_CLASS[9]){
