@@ -4,6 +4,7 @@ TOKEN SCANNER(FILE *file){
     int STATE = 0;
     int SYMBOL;
     int NEXT_STATE;
+    TOKEN token;
     
     char ch;
     std::string buffer;
@@ -39,8 +40,11 @@ TOKEN SCANNER(FILE *file){
             coluna++;
         }
     }
-
-    return make_token((char*) buffer.c_str(), STATE, linha, coluna);
+    token = make_token((char*) buffer.c_str(), STATE); 
+    if(token.token_class == TOKEN_CLASS[12]){
+        printf("Token invalido: |%s| - linha: %d - coluna: %d\n", token.lexema.c_str(), linha, coluna + 2);
+    }
+    return token;
 }
 
 char skip_ws(char ch, int STATE, FILE *file, int *linha, int *coluna){
@@ -149,11 +153,8 @@ int transition(int STATE, int SYMBOL){
     return TRANSITION_TABLE[STATE][SYMBOL];
 }
 
-TOKEN make_token(std::string buffer, int STATE, int line, int col){
+TOKEN make_token(std::string buffer, int STATE){
     TOKEN token;
-    
-    token.line = line;
-    token.col = col;
 
     switch (STATE){
         case 1:

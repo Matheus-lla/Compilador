@@ -19,28 +19,30 @@ int main(int argc, char* argv[]){
         token = SCANNER(file);
         
         if (token.token_class == TOKEN_CLASS[9]){
-            if (auto search = SYMBOLS_TABLE.find(token.lexema); search == SYMBOLS_TABLE.end()){
+            if (auto result_tabela = SYMBOLS_TABLE.find(token.lexema); result_tabela == SYMBOLS_TABLE.end()){
                 SYMBOLS_TABLE.insert({token.lexema, token});
-                printf("print novo id: |%s| - |%s| - |%s| - lin:|%d| - col:|%d|\n", 
+                printf("print novo id: |%s| - |%s| - |%s|\n", 
                                         token.lexema.c_str(),
                                         token.token_class.c_str(),
-                                        token.type.c_str(),
-                                        token.line,
-                                        token.col);
+                                        token.type.c_str());
             }
             else{
-                if (search->second.lexema == search->second.token_class and search->second.token_class == search->second.type){
-                    printf("print reservada: |%s| - |%s| - |%s| - lin:|%d| - col:|%d|\n",
-                                        search->second.lexema.c_str(),
-                                        search->second.token_class.c_str(),
-                                        search->second.type.c_str(),
-                                        token.line,
-                                        token.col);
+                if (result_tabela->second.lexema == result_tabela->second.token_class and result_tabela->second.token_class == result_tabela->second.type){
+                    printf("print reservada: |%s| - |%s| - |%s|\n",
+                                        result_tabela->second.lexema.c_str(),
+                                        result_tabela->second.token_class.c_str(),
+                                        result_tabela->second.type.c_str());
                 }
             }
-            
         }
-         
+        else{
+            if(token.token_class != TOKEN_CLASS[12]){
+                printf("print novo id: |%s| - |%s| - |%s|\n", 
+                                        token.lexema.c_str(),
+                                        token.token_class.c_str(),
+                                        token.type.c_str());
+            }
+        }
     }
     
 

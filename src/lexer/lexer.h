@@ -6,8 +6,6 @@ typedef struct TOKEN {
     std::string lexema;
     std::string token_class;
     std::string type;
-    int line;
-    int col;
 } TOKEN;
 
 const std::string TOKEN_CLASS[] = {
@@ -61,7 +59,7 @@ int get_symbol(char ch);
 bool is_letter(char ch);
 bool is_number(char ch);
 int transition(int STATE, int SYMBOL);
-TOKEN make_token(std::string buffer, int STATE, int line, int col);
+TOKEN make_token(std::string buffer, int STATE);
 TOKEN make_palavra_reservada(std::string buffer);
 
 #endif 
