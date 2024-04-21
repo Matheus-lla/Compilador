@@ -6,6 +6,8 @@ typedef struct TOKEN {
     std::string lexema;
     std::string token_class;
     std::string type;
+    int line;
+    int col;
 } TOKEN;
 
 const std::string TOKEN_CLASS[] = {
@@ -54,12 +56,12 @@ const int TRANSITION_TABLE[22][30] = {
 const int FINAL_STATE = 29;
 
 TOKEN SCANNER(FILE *file);
-char skip_ws(char ch, int STATE, FILE *file);
+char skip_ws(char ch, int STATE, FILE *file, int *linha, int *coluna);
 int get_symbol(char ch);
 bool is_letter(char ch);
 bool is_number(char ch);
 int transition(int STATE, int SYMBOL);
-TOKEN make_token(std::string buffer, int STATE);
+TOKEN make_token(std::string buffer, int STATE, int line, int col);
 TOKEN make_palavra_reservada(std::string buffer);
 
 #endif 

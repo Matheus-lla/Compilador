@@ -16,17 +16,26 @@ int main(int argc, char* argv[]){
     file = fopen(argv[1], "r");
 
     while (!(feof(file))){
-        printf("teste");
         token = SCANNER(file);
         
         if (token.token_class == TOKEN_CLASS[9]){
             if (auto search = SYMBOLS_TABLE.find(token.lexema); search == SYMBOLS_TABLE.end()){
                 SYMBOLS_TABLE.insert({token.lexema, token});
-                printf("print novo id: |%s| - |%s| - |%s|\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str());
+                printf("print novo id: |%s| - |%s| - |%s| - lin:|%d| - col:|%d|\n", 
+                                        token.lexema.c_str(),
+                                        token.token_class.c_str(),
+                                        token.type.c_str(),
+                                        token.line,
+                                        token.col);
             }
             else{
                 if (search->second.lexema == search->second.token_class and search->second.token_class == search->second.type){
-                    printf("print reservada: |%s| - |%s| - |%s|\n", search->second.lexema.c_str(), search->second.token_class.c_str(), search->second.type.c_str());
+                    printf("print reservada: |%s| - |%s| - |%s| - lin:|%d| - col:|%d|\n",
+                                        search->second.lexema.c_str(),
+                                        search->second.token_class.c_str(),
+                                        search->second.type.c_str(),
+                                        token.line,
+                                        token.col);
                 }
             }
             

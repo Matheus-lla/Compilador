@@ -8,12 +8,12 @@ TOKEN SCANNER(FILE *file){
     char ch;
     std::string buffer;
 
-    static int linha = 0;
-    static int coluna = 0;
+    static int linha = 1;
+    static int coluna = 1;
 
     while (!(feof(file))) {
         if ((ch = fgetc(file)) != EOF) {
-            ch = skip_ws(ch, STATE, file);
+            ch = skip_ws(ch, STATE, file, &linha, &coluna);
 
             SYMBOL = get_symbol(ch);
             NEXT_STATE = transition(STATE, SYMBOL);
@@ -21,6 +21,7 @@ TOKEN SCANNER(FILE *file){
             if(NEXT_STATE == -1){
                 buffer += '\0';
                 fseek(file, ftell(file)-1, SEEK_SET);
+                coluna--;
                 break;
             }
             else{ 
@@ -35,21 +36,23 @@ TOKEN SCANNER(FILE *file){
                 }            
             }
 
-            if (ch == '\n'){
-                linha++;
-                coluna = 0;
-            }
             coluna++;
         }
     }
 
-    return make_token((char*) buffer.c_str(), STATE);
+    return make_token((char*) buffer.c_str(), STATE, linha, coluna);
 }
 
-char skip_ws(char ch, int STATE, FILE *file){
+char skip_ws(char ch, int STATE, FILE *file, int *linha, int *coluna){
     while ((' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch || '\f' == ch || '\v' == ch) && STATE == 0) {
+        if(ch == '\n'){
+            (*linha) ++;
+            (*coluna) = 0;
+        }
+        (*coluna)++;
         ch = fgetc(file);
     }
+    
     return ch;
 }
 
@@ -146,9 +149,12 @@ int transition(int STATE, int SYMBOL){
     return TRANSITION_TABLE[STATE][SYMBOL];
 }
 
-TOKEN make_token(std::string buffer, int STATE){
+TOKEN make_token(std::string buffer, int STATE, int line, int col){
     TOKEN token;
     
+    token.line = line;
+    token.col = col;
+
     switch (STATE){
         case 1:
             token.lexema = buffer;

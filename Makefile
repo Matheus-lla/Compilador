@@ -2,10 +2,11 @@ build: clean init
 	g++ -o target/main src/main.cpp src/lexer/lexer.cpp
 
 init:
-	mkdir -p target/tmp
+	if not exist "target" mkdir target
+	if not exist "target\tmp" mkdir target\tmp
 
 clean:
-	rm -rf target
+	if exist "target" rd /s /q target
 
 test.all: test_comentario test_id test_lit test_num test_professora 
 
