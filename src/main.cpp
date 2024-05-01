@@ -21,32 +21,29 @@ int main(int argc, char* argv[]){
         if (token.token_class == TOKEN_CLASS[9]){
             if (auto result_tabela = SYMBOLS_TABLE.find(token.lexema); result_tabela == SYMBOLS_TABLE.end()){
                 SYMBOLS_TABLE.insert({token.lexema, token});
-                printf("print novo id: |%s| - |%s| - |%s|\n", 
-                                        token.lexema.c_str(),
+                printf("Classe: %s, Lexema: %s, Tipo: %s\n", 
                                         token.token_class.c_str(),
+                                        token.lexema.c_str(),
                                         token.type.c_str());
             }
             else{
                 if (result_tabela->second.lexema == result_tabela->second.token_class and result_tabela->second.token_class == result_tabela->second.type){
-                    printf("print reservada: |%s| - |%s| - |%s|\n",
-                                        result_tabela->second.lexema.c_str(),
+                    printf("Classe: %s, Lexema: %s, Tipo: %s\n",
                                         result_tabela->second.token_class.c_str(),
+                                        result_tabela->second.lexema.c_str(),
                                         result_tabela->second.type.c_str());
                 }
             }
         }
         else{
-            if(token.token_class != TOKEN_CLASS[12]){
-                printf("print novo id: |%s| - |%s| - |%s|\n", 
-                                        token.lexema.c_str(),
+            if(token.token_class != TOKEN_CLASS[8]){
+                printf("Classe: %s, Lexema: %s, Tipo: %s\n", 
                                         token.token_class.c_str(),
+                                        token.lexema.c_str(),
                                         token.type.c_str());
             }
         }
     }
-    
-
-
 
     return 0;
 }
