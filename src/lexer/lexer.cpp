@@ -42,7 +42,7 @@ TOKEN SCANNER(FILE *file){
     }
     token = make_token((char*) buffer.c_str(), STATE); 
     if(token.token_class == TOKEN_CLASS[12]){
-        printf("Token invalido: |%s| - linha: %d - coluna: %d\n", token.lexema.c_str(), linha, coluna + 2);
+        printf("ERRO - Token invalido: |%s| - linha: %d - coluna: %d\n", token.lexema.c_str(), linha, coluna + 2);
     }
     return token;
 }

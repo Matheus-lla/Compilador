@@ -1,6 +1,6 @@
 inicio
     varinicio
-        literal=teste; 
+        literal=te.ste; 
         real    valor_valido;
         inteiro id123;
     varfim
