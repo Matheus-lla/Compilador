@@ -42,7 +42,7 @@ TOKEN SCANNER(FILE *file){
     }
     token = make_token((char*) buffer.c_str(), STATE); 
     if(token.token_class == TOKEN_CLASS[12]){
-        printf("ERRO - Token invalido: |%s| - linha: %d - coluna: %d\n", token.lexema.c_str(), linha, coluna + 2);
+        printf("ERRO LEXICO - Caracter invalido na linguagem, linha: %d, coluna: %d\n", linha, coluna + 2);
     }
     return token;
 }
@@ -51,7 +51,7 @@ char skip_ws(char ch, int STATE, FILE *file, int *linha, int *coluna){
     while ((' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch || '\f' == ch || '\v' == ch) && STATE == 0) {
         if(ch == '\n'){
             (*linha) ++;
-            (*coluna) = 0;
+            (*coluna) = 1;
         }
         (*coluna)++;
         ch = fgetc(file);
@@ -155,6 +155,7 @@ int transition(int STATE, int SYMBOL){
 
 TOKEN make_token(std::string buffer, int STATE){
     TOKEN token;
+    token.type = "Nulo";
 
     switch (STATE){
         case 1:
