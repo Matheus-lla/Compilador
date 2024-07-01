@@ -7,22 +7,22 @@ init:
 clean:
 	rm -rf target
 
-test.all: test_comentario test_id test_lit test_num test_professora 
+test.all: test.comentario test.id test.lit test.num test.professora 
 
-test.comentario:
+test.comentario: build
 	./target/parser testes/teste_comentario.mgol
 
-test.descricaoT1:
+test.descricaoT1: build
 	./target/parser testes/teste_descricaoT1.mgol
 
-test.id:
+test.id: build
 	./target/parser testes/teste_id.mgol
 
-test.lit:
+test.lit: build
 	./target/parser testes/teste_lit.mgol
 
-test.num:
+test.num: build
 	./target/parser testes/teste_num.mgol
 
-test.professora: 
+test.professora: build 
 	./target/parser testes/teste_professora.mgol

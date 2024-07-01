@@ -41,9 +41,16 @@ TOKEN SCANNER(FILE *file){
         }
     }
     token = make_token((char*) buffer.c_str(), STATE); 
-    if(token.token_class == TOKEN_CLASS[12]){
-        printf("ERRO LEXICO - Caracter invalido na linguagem, linha: %d, coluna: %d\n", linha, coluna + 2);
+    if(feof(file) && STATE == 10) {
+        printf("ERRO LEXICO - Comentario nao fechado, linha: %d, coluna: %d\n", linha, coluna + 2);
+    } else {
+        if(token.token_class == TOKEN_CLASS[12]) {
+            printf("ERRO LEXICO - Caracter invalido na linguagem, linha: %d, coluna: %d\n", linha, coluna + 2);
+        }
     }
+    
+    
+    
     return token;
 }
 
