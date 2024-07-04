@@ -1,5 +1,7 @@
 #include "lexer/lexer.h"
+#include "parser.h"
 #include <unordered_map>
+#include <stack>
 
 void init_symbols_table(std::unordered_map<std::string, TOKEN>* SYMBOLS_TABLE);
 
@@ -10,10 +12,26 @@ int main(int argc, char* argv[]){
     char ch;
     TOKEN token;
     TOKEN token_aux;
+    std::string lexema;
 
     init_symbols_table(&SYMBOLS_TABLE);
 
     file = fopen(argv[1], "r");
+
+    printf("\n");
+    printf("\n");
+
+    for (size_t i = 0; i < 77; i++)
+    {
+        for (size_t j = 0; j < 45; j++)
+        {
+            printf("%3d|", PARSER_TRANSITION_TABLE[i][j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+    printf("\n");
+
 
     while (!(feof(file))){
         token = SCANNER(file);
