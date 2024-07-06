@@ -1,13 +1,7 @@
 inicio
     varinicio
-        real C ;
+        inteiro B;
     varfim;
-    c = 1e10;
-    c = 1.0e10;
-    c = 1e+10;
-    c = 1e-10;
-    c = 1E10;
-    c = 1E+;
-    c = 1E-10;
-    c = 1.0E10;
+    leia B;
+    escreva "hello";
 fim

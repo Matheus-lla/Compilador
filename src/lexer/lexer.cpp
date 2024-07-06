@@ -47,12 +47,13 @@ TOKEN SCANNER(FILE *file){
     if(feof(file) && STATE == 10) {
         printf("ERRO LEXICO - Comentario nao fechado, linha: %d, coluna: %d\n", linha, coluna + 2);
     } else {
-        if(token.token_class == TOKEN_CLASS[12]) {
-            printf("ERRO LEXICO - Caracter invalido na linguagem %s, linha: %d, coluna: %d\n", token.lexema.c_str(), linha, coluna + 2);
+        if (feof(file) && token.lexema.compare("") == 0) {
+            token = make_token((char*) "$", 15);
+        }
+        else if(token.token_class == TOKEN_CLASS[12]) {
+            printf("ERRO LEXICO - Caracter invalido na linguagem |%s|, linha: %d, coluna: %d\n", token.lexema.c_str(), linha, coluna + 2);
         }
     }
-    
-    
     
     return token;
 }
@@ -60,6 +61,7 @@ TOKEN SCANNER(FILE *file){
 char skip_ws(char ch, int STATE, FILE *file, int *linha, int *coluna){
     while ((' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch || '\f' == ch || '\v' == ch) && STATE == 0) {
         if(ch == '\n'){
+            printf("\nlinha: %d\n", (*linha));
             (*linha) ++;
             (*coluna) = 1;
         }

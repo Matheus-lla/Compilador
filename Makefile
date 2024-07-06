@@ -1,4 +1,5 @@
 build: clean init 
+	clear
 	g++ -o target/parser src/parser.cpp src/lexer/lexer.cpp
 
 init:
@@ -6,6 +7,9 @@ init:
 
 clean:
 	rm -rf target
+
+run: build
+	./target/parser 
 
 test.all: test.comentario test.id test.lit test.num test.professora 
 
