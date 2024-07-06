@@ -1,7 +1,25 @@
-inicio@
-    varinicio@
-        literal=te.ste; 
-        real    valor_valido;
-        inteiro id123;
-    varfim
+
+inicio
+varinicio
+varfim
+;
+A
+,
+inteiro
+real
+literal
+leia
+escreva
+"hello"
+12
+<-
++
+se
+(
+)
+entao
+>
+fimse
+repita
+fimrepita
 fim
