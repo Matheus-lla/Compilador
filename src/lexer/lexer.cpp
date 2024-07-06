@@ -61,7 +61,6 @@ TOKEN SCANNER(FILE *file){
 char skip_ws(char ch, int STATE, FILE *file, int *linha, int *coluna){
     while ((' ' == ch || '\t' == ch || '\n' == ch || '\r' == ch || '\f' == ch || '\v' == ch) && STATE == 0) {
         if(ch == '\n'){
-            printf("\nlinha: %d\n", (*linha));
             (*linha) ++;
             (*coluna) = 1;
         }

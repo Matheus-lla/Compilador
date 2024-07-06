@@ -90,7 +90,7 @@ int main(int argc, char* argv[]){
                 STATE = t;
                 get_next_token = true;
 
-                printf("shift t: %3d\n", t);
+                // printf("shift t: %3d\n", t);
                 continue;
             }
             else if (NEXT_STATE < 300) {
@@ -99,7 +99,12 @@ int main(int argc, char* argv[]){
 
                 rule_size = get_reduce_rule_size(reduce);
                 rule_A = get_reduce_rule_A(reduce);
-                printf("reduce: %3d\n", reduce);
+                // printf("reduce: %3d\n", reduce);
+
+                // printf("STACK\n");
+                // for (std::stack<int> dump = PARSER_STACK; !dump.empty(); dump.pop())
+                //     printf("%d ", dump.top());
+                // printf("\n");
 
                 for (int i = 0; i < rule_size; i++) {
                     PARSER_STACK.pop();
@@ -108,9 +113,9 @@ int main(int argc, char* argv[]){
                 
                 PARSER_STACK.push(PARSER_TRANSITION_TABLE[t][rule_A]);
 
-                printf("t: %3d - rule_A: %3d - ", t, rule_A);
+                // printf("after pop t: %3d - rule_A: %3d - ", t, rule_A);
                 print_grammar_rule(reduce);
-                printf("t: %3d\n",PARSER_STACK.top());
+                // printf("t: %3d\n",PARSER_STACK.top());
                 get_next_token = false;
             }
             else {
@@ -230,6 +235,7 @@ int get_reduce_rule_size(int reduce) {
         reduce == 15 ||
         reduce == 16 ||
         reduce == 17 ||
+        reduce == 21 ||
         reduce == 22 ||
         reduce == 23 ||
         reduce == 31 ||
