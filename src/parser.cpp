@@ -84,8 +84,7 @@ int main(int argc, char* argv[]){
                 printf("\nERRO!!!! - stack_top: %d - token_class_value: %d\ntoken: |%s| |%s| |%s|\n\n",
                        stack_top, token_class_value, token.lexema.c_str(), token.token_class.c_str(), token.type.c_str());
                 error_detected = true;
-
-                // Modo pânico: consome tokens até encontrar um token de sincronização
+                 //Modo pânico: consome tokens até encontrar um token de sincronização
                 while (true) {
                     if (SYNC_TOKENS.find(token.token_class) != SYNC_TOKENS.end() || token.token_class == TOKEN_CLASS[12]) {
                         break;
@@ -96,8 +95,8 @@ int main(int argc, char* argv[]){
                 // Redefinir o estado do parser para continuar
                 get_next_token = false;
                 error_detected = false;
-                printf("aqui");
-                continue;
+                //continue;
+                break;
             }
             else if (NEXT_STATE >= 0 && NEXT_STATE < 100) {
                 // printf("\nGOTO\ntoken: |%s| |%s| |%s|\nstack_top: %d\nnext_state: %d\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), stack_top, NEXT_STATE);
