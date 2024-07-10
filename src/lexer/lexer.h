@@ -6,6 +6,8 @@ typedef struct TOKEN {
     std::string lexema;
     std::string token_class;
     std::string type;
+    int linha;
+    int coluna;
 } TOKEN;
 
 const std::string TOKEN_CLASS[] = {
