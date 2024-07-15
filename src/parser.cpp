@@ -31,6 +31,7 @@ int main(int argc, char* argv[]){
 
     bool get_next_token = true;
     bool error_detected = false;
+    bool eof_detected = false;
 
     FILE *file;
     char ch;
@@ -72,35 +73,60 @@ int main(int argc, char* argv[]){
         {
             break;
         }
+
+        if(eof_detected){
+            break;
+        }
         
         if(token.token_class != TOKEN_CLASS[8] && token.token_class != TOKEN_CLASS[12]){
             stack_top = PARSER_STACK.top();
             token_class_value = get_token_class_value(token);
 
             NEXT_STATE = PARSER_TRANSITION_TABLE[stack_top][token_class_value];
+            printf("next: %d - stack_top: %d - token_value: %d\n", NEXT_STATE, stack_top, token_class_value);
 
             // printf("\nAQUI\ntoken: |%s| |%s| |%s|\nstack_top: %d\nnext_state: %d\nclass_value: %d\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), stack_top, NEXT_STATE, token_class_value);
-            
-            if (NEXT_STATE == -1){
+            if (NEXT_STATE == -1) {
                 printf("\nERRO!!!! - stack_top: %d - token_class_value: %d\ntoken: |%s| |%s| |%s| - linha: %d - coluna: %d\n\n",
                        stack_top, token_class_value, token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), token.linha, token.coluna);
                 error_detected = true;
-                 //Modo pânico: consome tokens até encontrar um token de sincronização
+
+                // Modo pânico: consome tokens até encontrar um token de sincronização
                 while (true) {
-                    if (SYNC_TOKENS.find(token.token_class) != SYNC_TOKENS.end() || token.token_class == TOKEN_CLASS[12] || token.token_class == TOKEN_CLASS[10]) {
+                    if (SYNC_TOKENS.find(token.token_class) != SYNC_TOKENS.end() || token.token_class == TOKEN_CLASS[12]) {
+                        if (token.token_class == TOKEN_CLASS[12]) {
+                            eof_detected = true;
+                            get_next_token = false;
+                        }
                         break;
                     }
-                    if(token.token_class == TOKEN_CLASS[10]){
-                        get_next_token = false;
-                    }
                     token = SCANNER(file);
-
+                    printf("Valor do token aqui dentro: %s\n", token.lexema.c_str());
                 }
-                if(get_next_token == false){
+
+                if (eof_detected) {
                     break;
                 }
+
                 get_next_token = true;
-                error_detected = false;
+
+                // Desempilha até encontrar um estado que permita continuar
+                while (!PARSER_STACK.empty() && NEXT_STATE == -1) {
+                    PARSER_STACK.pop();
+                    if (!PARSER_STACK.empty()) {
+                        stack_top = PARSER_STACK.top();
+                        NEXT_STATE = PARSER_TRANSITION_TABLE[stack_top][token_class_value];
+                        if(NEXT_STATE != -1){
+                            get_next_token = false;
+                        }
+                    }
+                }
+
+                if (PARSER_STACK.empty()) {
+                    printf("\nErro irrecuperável.\n");
+                    break;
+                }
+
                 continue;
             }
             else if (NEXT_STATE >= 0 && NEXT_STATE < 100) {
@@ -413,7 +439,7 @@ void print_grammar_rule(int reduce) {
         printf("LV -> D LV\n");
         break;
     case 5:
-        printf("LV -> varfim pt_v\n");
+        printf("  -> varfim pt_v\n");
         break;
     case 6:
         printf("D -> TIPO L pt_v\n");
@@ -518,7 +544,7 @@ void print_grammar_rule(int reduce) {
         printf("A -> fim\n");
         break;
     default:
-        printf("ERRO SINTATIcO!!!!\n");
+        printf("ERRO SINTATICO!!!!\n");
         break;
     }
 }
