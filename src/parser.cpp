@@ -4,6 +4,7 @@
 #include <stack>
 #include <set>
 #include <iostream>
+#include <vector>
 
 
 void init_symbols_table(std::unordered_map<std::string, TOKEN>* SYMBOLS_TABLE);
@@ -13,6 +14,10 @@ int get_reduce_rule_A(int reduce);
 void print_grammar_rule(int reduce);
 
 std::set<std::string> SYNC_TOKENS = {"PT_V", "FC_P", "fim", "fimse", "fimrepita"};
+
+std::vector<TOKEN> tokens_to_insert = {
+    make_token("PT_V", 2), make_token("FC_P", 4), make_token("VIR", 0)
+};
 
 
 int main(int argc, char* argv[]){
@@ -83,51 +88,65 @@ int main(int argc, char* argv[]){
             token_class_value = get_token_class_value(token);
 
             NEXT_STATE = PARSER_TRANSITION_TABLE[stack_top][token_class_value];
-            printf("next: %d - stack_top: %d - token_value: %d\n", NEXT_STATE, stack_top, token_class_value);
-
             // printf("\nAQUI\ntoken: |%s| |%s| |%s|\nstack_top: %d\nnext_state: %d\nclass_value: %d\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), stack_top, NEXT_STATE, token_class_value);
             if (NEXT_STATE == -1) {
                 printf("\nERRO!!!! - stack_top: %d - token_class_value: %d\ntoken: |%s| |%s| |%s| - linha: %d - coluna: %d\n\n",
                        stack_top, token_class_value, token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), token.linha, token.coluna);
                 error_detected = true;
 
-                // Modo pânico: consome tokens até encontrar um token de sincronização
-                while (true) {
-                    if (SYNC_TOKENS.find(token.token_class) != SYNC_TOKENS.end() || token.token_class == TOKEN_CLASS[12]) {
-                        if (token.token_class == TOKEN_CLASS[12]) {
-                            eof_detected = true;
-                            get_next_token = false;
-                        }
+                // Modo de correção global: tentar inserir ou deletar tokens
+                bool token_fixed = false;
+                for (const auto& fix_token : tokens_to_insert) {
+                    token_class_value = get_token_class_value(fix_token);
+                    NEXT_STATE = PARSER_TRANSITION_TABLE[stack_top][token_class_value];
+                    if (NEXT_STATE != -1) {
+                        printf("Inserindo token: |%s| para correção\n", fix_token.lexema.c_str());
+                        token = fix_token;
+                        token_fixed = true;
                         break;
                     }
-                    token = SCANNER(file);
-                    printf("Valor do token aqui dentro: %s\n", token.lexema.c_str());
                 }
 
-                if (eof_detected) {
-                    break;
-                }
+                if (!token_fixed) {
+                    // Modo pânico: consome tokens até encontrar um token de sincronização
+                    while (true) {
+                        if (SYNC_TOKENS.find(token.token_class) != SYNC_TOKENS.end() || token.token_class == TOKEN_CLASS[12]) {
+                            if (token.token_class == TOKEN_CLASS[12]) {
+                                eof_detected = true;
+                                get_next_token = false;
+                            }
+                            break;
+                        }
+                        token = SCANNER(file);
+                        printf("Valor do token aqui dentro: %s\n", token.lexema.c_str());
+                    }
 
-                get_next_token = true;
+                    if (eof_detected) {
+                        break;
+                    }
 
-                // Desempilha até encontrar um estado que permita continuar
-                while (!PARSER_STACK.empty() && NEXT_STATE == -1) {
-                    PARSER_STACK.pop();
-                    if (!PARSER_STACK.empty()) {
-                        stack_top = PARSER_STACK.top();
-                        NEXT_STATE = PARSER_TRANSITION_TABLE[stack_top][token_class_value];
-                        if(NEXT_STATE != -1){
-                            get_next_token = false;
+                    get_next_token = true;
+
+                    // Desempilha até encontrar um estado que permita continuar
+                    while (!PARSER_STACK.empty() && NEXT_STATE == -1) {
+                        PARSER_STACK.pop();
+                        if (!PARSER_STACK.empty()) {
+                            stack_top = PARSER_STACK.top();
+                            token_class_value = get_token_class_value(token);
+                            NEXT_STATE = PARSER_TRANSITION_TABLE[stack_top][token_class_value];
+                            if(NEXT_STATE != -1){
+                                get_next_token = false;
+                            }
                         }
                     }
-                }
 
-                if (PARSER_STACK.empty()) {
-                    printf("\nErro irrecuperável.\n");
-                    break;
-                }
+                    if (PARSER_STACK.empty()) {
+                        printf("\nErro irrecuperável.\n");
+                        break;
+                    }
 
-                continue;
+                    continue;
+                }
             }
             else if (NEXT_STATE >= 0 && NEXT_STATE < 100) {
                 // printf("\nGOTO\ntoken: |%s| |%s| |%s|\nstack_top: %d\nnext_state: %d\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), stack_top, NEXT_STATE);
