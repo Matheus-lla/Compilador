@@ -1,9 +1,9 @@
 build: clean init 
 	clear
-	g++ -o target/parser src/parser.cpp src/lexer/lexer.cpp
+	g++ -fdiagnostics-color=always -ggdb src/parser.cpp src/lexer/lexer.cpp -o target/parser
 
 init:
-	mkdir -p target/tmp
+	mkdir -p target
 
 clean:
 	rm -rf target
