@@ -2,21 +2,7 @@
 #define PARSER_H_
 #include <string>
 
-/*
-valores de 0 a 100 sao de transicao normal da tabela direta
-valores de 100 a 200 sao de shift
-valores de 200 a 300 sao de reduce
-500 acc
-*/
-
-
-
-
-
 const int PARSER_TRANSITION_TABLE[77][44] = {
-/*  
-    inicio	varinicio	varfim	pt_v	id	vir	inteiro	real	literal	leia	escreva	lit	num	rcb	opm	se	ab_p	fc_p	opr	fimse	repita	fimrepita	varfim	então	fim	$	P	V	A	LV	D	TIPO	L	ES	ARG	CMD	LD	OPRD	COND	CAB	CP	EXP_R	R	CABR	CPR
-       0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43 */
     {102, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,500, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     { -1,104, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},

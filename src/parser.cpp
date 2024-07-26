@@ -20,7 +20,6 @@ std::vector<TOKEN> tokens_to_insert = {
     make_palavra_reservada("inicio"), make_palavra_reservada("varfim"),
 };
 
-// Conjunto de tokens esperados para substituição, conforme contexto do analisador
 std::unordered_map<int, std::vector<TOKEN>> EXPECTED_TOKENS = {
     {0, {make_palavra_reservada("inicio")}},
     {2, {make_palavra_reservada("varinicio")}},
@@ -31,7 +30,6 @@ std::unordered_map<int, std::vector<TOKEN>> EXPECTED_TOKENS = {
     {28, {make_token("PT_V", 2)}},
     {29, {make_token("PT_V", 2)}},
     {30, {make_token("PT_V", 2)}}
-    // Adicione mais estados e tokens esperados conforme a gramática
 };
 
 
@@ -88,7 +86,6 @@ int main(int argc, char* argv[]){
         }
 
 
-        // printf("\nAQUI\ntoken: |%s| |%s| |%s|\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str());
         if (token.token_class == TOKEN_CLASS[12])
         {
             break;
@@ -103,13 +100,11 @@ int main(int argc, char* argv[]){
             token_class_value = get_token_class_value(token);
 
             NEXT_STATE = PARSER_TRANSITION_TABLE[stack_top][token_class_value];
-            // printf("\nAQUI\ntoken: |%s| |%s| |%s|\nstack_top: %d\nnext_state: %d\nclass_value: %d\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), stack_top, NEXT_STATE, token_class_value);
              if (NEXT_STATE == -1) {
                 printf("\nERRO!!!! - stack_top: %d - token_class_value: %d\ntoken: |%s| |%s| |%s| - linha: %d - coluna: %d\n\n",
                        stack_top, token_class_value, token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), token.linha, token.coluna);
                 error_detected = true;
 
-                // Tentar substituir o token por um esperado
                 bool token_replaced = false;
                 if (EXPECTED_TOKENS.find(stack_top) != EXPECTED_TOKENS.end()) {
                     for (const auto& expected_token : EXPECTED_TOKENS[stack_top]) {
@@ -120,7 +115,6 @@ int main(int argc, char* argv[]){
                             }
                         }
                         NEXT_STATE = PARSER_TRANSITION_TABLE[stack_top][token_class_value];
-                        printf("topo: %d - token: %s\n", stack_top, token.lexema.c_str());
                         if (NEXT_STATE != -1) {
                             printf("Substituindo token: |%s| por |%s| para correção\n", token.lexema.c_str(), expected_token.lexema.c_str());
                             token = expected_token;
@@ -131,12 +125,10 @@ int main(int argc, char* argv[]){
                 }
 
                 if (!token_replaced) {
-                    // Tentar inserir tokens
                     bool token_fixed = false;
                     for (const auto& fix_token : tokens_to_insert) {
                         token_class_value = get_token_class_value(fix_token);
                         NEXT_STATE = PARSER_TRANSITION_TABLE[stack_top][token_class_value];
-                        printf("topo rep - %d - token: %s\n", stack_top, token.lexema.c_str());
                         if (NEXT_STATE != -1) {
                             printf("Inserindo token: |%s| para correção\n", fix_token.lexema.c_str());
                             token = fix_token;
@@ -146,7 +138,6 @@ int main(int argc, char* argv[]){
                     }
 
                     if (!token_fixed) {
-                        // Modo pânico: consome tokens até encontrar um token de sincronização
                         while (true) {
                             if (SYNC_TOKENS.find(token.token_class) != SYNC_TOKENS.end() || token.token_class == TOKEN_CLASS[12]) {
                                 if (token.token_class == TOKEN_CLASS[12]) {
@@ -156,7 +147,6 @@ int main(int argc, char* argv[]){
                                 break;
                             }
                             token = SCANNER(file);
-                            printf("Valor do token aqui dentro: %s\n", token.lexema.c_str());
                         }
 
                         if (eof_detected) {
@@ -165,7 +155,6 @@ int main(int argc, char* argv[]){
 
                         get_next_token = true;
 
-                        // Desempilha até encontrar um estado que permita continuar
                         while (!PARSER_STACK.empty() && NEXT_STATE == -1) {
                             PARSER_STACK.pop();
                             if (!PARSER_STACK.empty()) {
@@ -188,34 +177,21 @@ int main(int argc, char* argv[]){
                 }
             }
             else if (NEXT_STATE >= 0 && NEXT_STATE < 100) {
-                printf("vim next1");
-                // printf("\nGOTO\ntoken: |%s| |%s| |%s|\nstack_top: %d\nnext_state: %d\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), stack_top, NEXT_STATE);
                 STATE = NEXT_STATE;
             }
             else if (NEXT_STATE < 200) {
-            printf("vim next2");
                 t = NEXT_STATE % 100;
-                // printf("\nSHIFT\ntoken: |%s| |%s| |%s|\nstack_top: %d\nt: %d\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), stack_top, t);
                 PARSER_STACK.push(t);
                 STATE = t;
                 get_next_token = true;
 
-                // printf("shift t: %3d\n", t);
                 continue;
             }
             else if (NEXT_STATE < 300) {
-                printf("vim next3");
-                // printf("\nREDUCE\ntoken: |%s| |%s| |%s|\nstack_top: %d\nnext_state: %d\n", token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), stack_top, NEXT_STATE);
                 reduce = NEXT_STATE % 200;
 
                 rule_size = get_reduce_rule_size(reduce);
                 rule_A = get_reduce_rule_A(reduce);
-                // printf("reduce: %3d\n", reduce);
-
-                // printf("STACK\n");
-                // for (std::stack<int> dump = PARSER_STACK; !dump.empty(); dump.pop())
-                //     printf("%d ", dump.top());
-                // printf("\n");
 
                 for (int i = 0; i < rule_size; i++) {
                     PARSER_STACK.pop();
@@ -224,9 +200,7 @@ int main(int argc, char* argv[]){
                 
                 PARSER_STACK.push(PARSER_TRANSITION_TABLE[t][rule_A]);
 
-                // printf("after pop t: %3d - rule_A: %3d - ", t, rule_A);
                 print_grammar_rule(reduce);
-                // printf("t: %3d\n",PARSER_STACK.top());
                 get_next_token = false;
             }
             else {
