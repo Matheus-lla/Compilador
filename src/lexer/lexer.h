@@ -10,7 +10,7 @@ typedef struct TOKEN {
     int coluna;
 } TOKEN;
 
-const std::string TOKEN_CLASS[] = {
+const std::string TOKEN_CLASS[13] = {
     "VIR",
     "PT_V",
     "AB_P",

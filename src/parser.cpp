@@ -12,6 +12,8 @@ int get_token_class_value(TOKEN token);
 int get_reduce_rule_size(int reduce);
 int get_reduce_rule_A(int reduce);
 void print_grammar_rule(int reduce);
+void generate_header(FILE *file);
+void generate_tail(FILE *file);
 
 std::set<std::string> SYNC_TOKENS = {"PT_V", "FC_P", "fim", "fimse", "fimrepita"};
 
@@ -52,6 +54,7 @@ int main(int argc, char* argv[]){
     bool eof_detected = false;
 
     FILE *file;
+    FILE *file_obj;
     char ch;
     TOKEN token;
     TOKEN token_aux;
@@ -65,7 +68,9 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     file = fopen(argv[1], "r");
+    file_obj = fopen("./target/output.c", "w");
 
+    generate_header(file_obj);
 
     while (true){
         if(get_next_token) {
@@ -85,17 +90,7 @@ int main(int argc, char* argv[]){
             }
         }
 
-
-        if (token.token_class == TOKEN_CLASS[12])
-        {
-            break;
-        }
-
-        if(eof_detected){
-            break;
-        }
-        
-        if(token.token_class != TOKEN_CLASS[8] && token.token_class != TOKEN_CLASS[12]){
+        if(token.token_class != TOKEN_CLASS[8] && token.token_class != TOKEN_CLASS[12]) {
             stack_top = PARSER_STACK.top();
             token_class_value = get_token_class_value(token);
 
@@ -208,7 +203,16 @@ int main(int argc, char* argv[]){
                 break;
             }
         }
+        else {
+            get_next_token = true;
+        }
+        
     }
+
+    generate_tail(file_obj);
+
+    fclose(file);
+    fclose(file_obj);
 
     return 0;
 }
@@ -474,7 +478,7 @@ void print_grammar_rule(int reduce) {
         printf("LV -> D LV\n");
         break;
     case 5:
-        printf("  -> varfim pt_v\n");
+        printf("\n\n\n\n");
         break;
     case 6:
         printf("D -> TIPO L pt_v\n");
@@ -582,4 +586,14 @@ void print_grammar_rule(int reduce) {
         printf("ERRO SINTATICO!!!!\n");
         break;
     }
+}
+
+void generate_header(FILE *file) {
+    fprintf(file, "#include<stdio.h>\n\n");
+    fprintf(file, "int main(int argc, char* argv[]) {\n");
+}
+
+void generate_tail(FILE *file){
+    fprintf(file, "\n\treturn 0;\n");
+    fprintf(file, "}\n");
 }
