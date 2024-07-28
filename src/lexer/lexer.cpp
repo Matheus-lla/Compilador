@@ -224,6 +224,7 @@ TOKEN make_token(std::string buffer, int STATE){
         case 11:
             token.lexema = buffer;
             token.token_class = TOKEN_CLASS[7];
+            token.type = buffer;
             return token;
             break;
         case 13:
@@ -262,6 +263,16 @@ TOKEN make_token(std::string buffer, int STATE){
             return token;
             break;
     }   
+}
+
+TOKEN make_token_with_type(std::string buffer, std::string token_class, std::string type) {
+    TOKEN token;
+
+    token.lexema = buffer;
+    token.token_class = token_class;
+    token.type = type;
+
+    return token;
 }
 
 TOKEN make_palavra_reservada(std::string buffer){

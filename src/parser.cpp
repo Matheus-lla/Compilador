@@ -14,6 +14,10 @@ int get_reduce_rule_A(int reduce);
 void print_grammar_rule(int reduce);
 void generate_header(FILE *file);
 void generate_tail(FILE *file);
+void execute_semantic_rule(FILE *file, int rule, TOKEN token, 
+        std::stack<TOKEN>& SEMANTIC_STACK, 
+        std::unordered_map<std::string, TOKEN>& SYMBOLS_TABLE);
+TOKEN findLastType(std::stack<TOKEN>& SEMANTIC_STACK, std::string type);
 
 std::set<std::string> SYNC_TOKENS = {"PT_V", "FC_P", "fim", "fimse", "fimrepita"};
 
@@ -34,10 +38,12 @@ std::unordered_map<int, std::vector<TOKEN>> EXPECTED_TOKENS = {
     {30, {make_token("PT_V", 2)}}
 };
 
+bool has_error = false;
 
 int main(int argc, char* argv[]){
     std::unordered_map<std::string, TOKEN> SYMBOLS_TABLE;
     std::stack<int> PARSER_STACK;
+    std::stack<TOKEN> SEMANTIC_STACK;
 
     int STATE = 0;
     int NEXT_STATE;
@@ -62,6 +68,7 @@ int main(int argc, char* argv[]){
 
     init_symbols_table(&SYMBOLS_TABLE);
     PARSER_STACK.push(0);
+    SEMANTIC_STACK.push(make_palavra_reservada("-"));
 
     if(argc < 2) {
         printf("\n\nChamada sem argumento!!\n\n");
@@ -177,6 +184,7 @@ int main(int argc, char* argv[]){
             else if (NEXT_STATE < 200) {
                 t = NEXT_STATE % 100;
                 PARSER_STACK.push(t);
+                SEMANTIC_STACK.push(token);
                 STATE = t;
                 get_next_token = true;
 
@@ -196,6 +204,8 @@ int main(int argc, char* argv[]){
                 PARSER_STACK.push(PARSER_TRANSITION_TABLE[t][rule_A]);
 
                 print_grammar_rule(reduce);
+                execute_semantic_rule(file_obj, reduce, token, SEMANTIC_STACK, SYMBOLS_TABLE);
+
                 get_next_token = false;
             }
             else {
@@ -478,7 +488,7 @@ void print_grammar_rule(int reduce) {
         printf("LV -> D LV\n");
         break;
     case 5:
-        printf("\n\n\n\n");
+        printf("LV -> varfim pt_v\n");
         break;
     case 6:
         printf("D -> TIPO L pt_v\n");
@@ -589,11 +599,205 @@ void print_grammar_rule(int reduce) {
 }
 
 void generate_header(FILE *file) {
-    fprintf(file, "#include<stdio.h>\n\n");
-    fprintf(file, "int main(int argc, char* argv[]) {\n");
+    fprintf(file, "#include<stdio.h>\n");
+    fprintf(file, "typedef char literal[256];\n");
+    fprintf(file, "void main(void) {\n");
 }
 
 void generate_tail(FILE *file){
-    fprintf(file, "\n\treturn 0;\n");
-    fprintf(file, "}\n");
+    fprintf(file, "\n}\n");
+}
+
+void execute_semantic_rule(FILE *file, int rule, 
+        TOKEN token,
+        std::stack<TOKEN>& SEMANTIC_STACK,
+        std::unordered_map<std::string, TOKEN>& SYMBOLS_TABLE) {
+    TOKEN stack_top_value;
+    TOKEN last_type;
+
+    switch (rule) {
+    case 5:
+        fprintf(file, "\t/*\n\n\n\n\t*/\n");
+        break;
+    case 6:
+        SEMANTIC_STACK.pop();
+        last_type = SEMANTIC_STACK.top();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.push(make_token_with_type("D", "D", last_type.type.c_str()));
+        fprintf(file, ";\n");
+        break;
+    case 7:
+        last_type = SEMANTIC_STACK.top();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.pop();
+        stack_top_value = SEMANTIC_STACK.top();
+        if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
+            result_from_table->second.type = last_type.type;
+        }
+        fprintf(file, ", %s", SEMANTIC_STACK.top().lexema.c_str());
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.push(make_token_with_type("L", "L", "inteiro"));
+        break;
+    case 8:
+        last_type = findLastType(SEMANTIC_STACK, "TIPO");
+        stack_top_value = SEMANTIC_STACK.top();
+        if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
+            result_from_table->second.type = last_type.type;
+        }
+        fprintf(file, " %s", SEMANTIC_STACK.top().lexema.c_str());
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.push(make_token_with_type("L", "L", last_type.type.c_str()));
+        break;
+    case 9:
+        stack_top_value = SEMANTIC_STACK.top();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.push(make_token_with_type("TIPO", "TIPO", "int"));
+        fprintf(file, "\t%s", SEMANTIC_STACK.top().type.c_str());
+        break;
+    case 10:
+        stack_top_value = SEMANTIC_STACK.top();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.push(make_token_with_type("TIPO", "TIPO", "double"));
+        fprintf(file, "\t%s", SEMANTIC_STACK.top().type.c_str());
+        break;
+    case 11:
+        stack_top_value  = SEMANTIC_STACK.top();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.push(make_token_with_type("TIPO", "TIPO", stack_top_value.type.c_str()));
+        fprintf(file, "\t%s", SEMANTIC_STACK.top().type.c_str());
+        break;
+    case 13:
+        SEMANTIC_STACK.pop();
+        stack_top_value  = SEMANTIC_STACK.top();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.pop();
+        if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
+            if(!result_from_table->second.type.compare("Nulo")) {
+                printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
+                has_error = true;
+            }
+            else if (!result_from_table->second.type.compare("int")) {
+                fprintf(file, "\tscanf(\"%%d\", &%s);\n", result_from_table->second.lexema.c_str());
+            }
+            else if (!result_from_table->second.type.compare("double")) {
+                fprintf(file, "\tscanf(\"%%ld\", &%s);\n", result_from_table->second.lexema.c_str());
+            }
+            else if (!result_from_table->second.type.compare("literal")) {
+                fprintf(file, "\tscanf(\"%%s\", %s);\n", result_from_table->second.lexema.c_str());
+            }
+        }
+        break;
+    case 14:
+        printf("ES -> escreva ARG pt_v\n");
+        break;
+    case 15:
+        printf("ARG -> lit\n");
+        break;
+    case 16:
+        printf("ARG -> num\n");
+        break;
+    case 17:
+        printf("ARG -> id\n");
+        break;
+    case 18:
+        printf("A -> CMD A\n");
+        break;
+    case 19:
+        printf("CMD -> id atr LD pt_v\n");
+        break;
+    case 20:
+        printf("LD -> OPRD opm OPRD\n");
+        break;
+    case 21:
+        printf("LD -> OPRD\n");
+        break;
+    case 22:
+        printf("OPRD -> id\n");
+        break;
+    case 23:
+        printf("OPRD -> num\n");
+        break;
+    case 24:
+        printf("A -> COND A\n");
+        break;
+    case 25:
+        printf("COND -> CAB CP\n");
+        break;
+    case 26:
+        printf("CAB -> se ab_p EXP_R fc_p entao\n");
+        break;
+    case 27:
+        printf("EXP_R -> OPRD opr OPRD\n");
+        break;
+    case 28:
+        printf("CP -> ES CP\n");
+        break;
+    case 29:
+        printf("CP -> CMD CP\n");
+        break;
+    case 30:
+        printf("CP -> COND CP\n");
+        break;
+    case 31:
+        printf("CP -> fimse\n");
+        break;
+    case 32:
+        printf("A -> RA\n");
+        break;
+    case 33:
+        printf("R -> CABR CPR\n");
+        break;
+    case 34:
+        printf("CABR -> repita ab_p EXP_R fc_p\n");
+        break;
+    case 35:
+        printf("CPR -> ES CPR\n");
+        break;
+    case 36:
+        printf("CPR -> CMD CPR\n");
+        break;
+    case 37:
+        printf("CPR -> COND CPR\n");
+        break;
+    case 38:
+        printf("CPR -> fimrepita\n");
+        break;
+    case 39:
+        printf("A -> fim\n");
+        break;
+    default:
+        printf("ERRO SINTATICO!!!!\n");
+        break;
+    }
+}
+
+TOKEN findLastType(std::stack<TOKEN> &SEMANTIC_STACK, std::string type)
+{
+    std::vector<TOKEN> tempVector;
+    TOKEN lastToken;
+    bool foundT = false;
+
+    while (!SEMANTIC_STACK.empty())
+    {
+        TOKEN token = SEMANTIC_STACK.top();
+        SEMANTIC_STACK.pop();
+        tempVector.push_back(token);
+
+        if (!token.token_class.compare(type)) {
+            lastToken = token;
+            foundT = true;
+        }
+    }
+
+    for (auto it = tempVector.rbegin(); it != tempVector.rend(); ++it) {
+        SEMANTIC_STACK.push(*it);
+    }
+
+    if (foundT) {
+        return lastToken;
+    }
+    else {
+        throw std::runtime_error("Nenhum token do tipo T encontrado.");
+    }
 }

@@ -1,7 +1,10 @@
 inicio
     varinicio
-        inteiro B;
+        inteiro a;
+        real b;
+        literal c;
     varfim;
-    leia B;
-    escreva "hello";
+    leia a;
+    leia b;
+    leia c;
 fim
