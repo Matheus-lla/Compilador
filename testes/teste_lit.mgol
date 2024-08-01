@@ -1,10 +1,22 @@
 inicio
     varinicio
-        inteiro a;
+        inteiro a, d;
         real b;
-        literal c;
+        literal c, e;
     varfim;
     leia a;
     leia b;
     leia c;
+    escreva a;
+    escreva b;
+    escreva "teste";
+    a<-1;
+    b<-5.6;
+    b<-5e6;
+    d<-a;
+    c<-e;
+    c<-a;
+    a<-1+2;
+    a<-d-2;
+    d<-1*a;
 fim

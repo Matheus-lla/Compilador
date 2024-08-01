@@ -62,7 +62,7 @@ bool is_letter(char ch);
 bool is_number(char ch);
 int transition(int STATE, int SYMBOL);
 TOKEN make_token(std::string buffer, int STATE);
-TOKEN make_token_with_type(std::string buffer, std::string STATE, std::string type);
+TOKEN make_token_with_type(std::string buffer, std::string TOKEN_CLASS, std::string type);
 TOKEN make_palavra_reservada(std::string buffer);
 
 #endif 

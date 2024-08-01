@@ -224,7 +224,7 @@ TOKEN make_token(std::string buffer, int STATE){
         case 11:
             token.lexema = buffer;
             token.token_class = TOKEN_CLASS[7];
-            token.type = buffer;
+            token.type = "literal";
             return token;
             break;
         case 13:
