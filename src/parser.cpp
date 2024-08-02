@@ -2,10 +2,13 @@
 #include "parser.h"
 #include <unordered_map>
 #include <stack>
+#include <queue>
 #include <set>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
+
 
 
 void init_symbols_table(std::unordered_map<std::string, TOKEN>* SYMBOLS_TABLE);
@@ -13,16 +16,17 @@ int get_token_class_value(TOKEN token);
 int get_reduce_rule_size(int reduce);
 int get_reduce_rule_A(int reduce);
 void print_grammar_rule(int reduce);
-long generate_header(FILE *file);
+void generate_header(FILE *file);
 void generate_tail(FILE *file);
 void execute_semantic_rule(FILE *file, int rule, TOKEN token, 
         std::stack<TOKEN>& SEMANTIC_STACK, 
         std::unordered_map<std::string, TOKEN>& SYMBOLS_TABLE,
         std::stack<std::string>& print_buffer,
-        std::stack<TOKEN>& TEMP_VAR_TO_PRINT,
+        std::queue<TOKEN>& TEMP_VAR_TO_PRINT,
         long file_pos);
 TOKEN findLastType(std::stack<TOKEN>& SEMANTIC_STACK, std::string type);
 bool is_real(std::string buffer);
+void create_obj(bool has_error, std::queue<TOKEN>& TEMP_VAR_TO_PRINT);
 
 std::set<std::string> SYNC_TOKENS = {"PT_V", "FC_P", "fim", "fimse", "fimrepita"};
 
@@ -50,7 +54,7 @@ int main(int argc, char* argv[]){
     std::stack<int> PARSER_STACK;
     std::stack<TOKEN> SEMANTIC_STACK;
     std::stack<std::string> print_buffer;
-    std::stack<TOKEN> TEMP_VAR_TO_PRINT;
+    std::queue<TOKEN> TEMP_VAR_TO_PRINT;
 
     int STATE = 0;
     int NEXT_STATE;
@@ -68,7 +72,6 @@ int main(int argc, char* argv[]){
 
     FILE *file;
     FILE *file_tmp;
-    FILE *file_obj;
     long file_pos;
     char ch;
     TOKEN token;
@@ -84,9 +87,9 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     file = fopen(argv[1], "r");
-    file_obj = fopen("./target/output.c", "w");
+    file_tmp = fopen("./target/tmp.c", "w");
 
-    file_pos = generate_header(file_obj);
+    generate_header(file_tmp);
 
     while (true){
         if(get_next_token) {
@@ -115,6 +118,7 @@ int main(int argc, char* argv[]){
                 printf("\nERRO!!!! - stack_top: %d - token_class_value: %d\ntoken: |%s| |%s| |%s| - linha: %d - coluna: %d\n\n",
                        stack_top, token_class_value, token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), token.linha, token.coluna);
                 error_detected = true;
+                // has_error = true;
 
                 bool token_replaced = false;
                 if (EXPECTED_TOKENS.find(stack_top) != EXPECTED_TOKENS.end()) {
@@ -213,12 +217,12 @@ int main(int argc, char* argv[]){
                 PARSER_STACK.push(PARSER_TRANSITION_TABLE[t][rule_A]);
 
                 print_grammar_rule(reduce);
-                execute_semantic_rule(file_obj, reduce, token, SEMANTIC_STACK, SYMBOLS_TABLE, print_buffer, TEMP_VAR_TO_PRINT, file_pos);
+                execute_semantic_rule(file_tmp, reduce, token, SEMANTIC_STACK, SYMBOLS_TABLE, print_buffer, TEMP_VAR_TO_PRINT, file_pos);
 
                 get_next_token = false;
             }
             else {
-                execute_semantic_rule(file_obj, 0, token, SEMANTIC_STACK, SYMBOLS_TABLE, print_buffer, TEMP_VAR_TO_PRINT, file_pos);
+                execute_semantic_rule(file_tmp, 0, token, SEMANTIC_STACK, SYMBOLS_TABLE, print_buffer, TEMP_VAR_TO_PRINT, file_pos);
                 printf("\n\naccept!!!\n\n");
                 break;
             }
@@ -229,12 +233,13 @@ int main(int argc, char* argv[]){
         
     }
 
-    generate_tail(file_obj);
-
+    generate_tail(file_tmp);
     fclose(file);
-    fclose(file_obj);
+    fclose(file_tmp);
+    create_obj(has_error, TEMP_VAR_TO_PRINT);
+    std::remove("./target/tmp.c");
 
-    return 0;
+        return 0;
 }
 
 void init_symbols_table(std::unordered_map<std::string, TOKEN>* SYMBOLS_TABLE){
@@ -604,19 +609,16 @@ void print_grammar_rule(int reduce) {
         break;
     default:
         printf("ERRO SINTATICO!!!!\n");
+        // has_error = true;
         break;
     }
 }
 
-long generate_header(FILE *file) {
+void generate_header(FILE *file) {
     long file_pos;
     fprintf(file, "#include<stdio.h>\n");
     fprintf(file, "typedef char literal[256];\n");
     fprintf(file, "void main(void) {\n");
-    fprintf(file, "/*\n");
-    file_pos = ftell(file);
-    fprintf(file, "\n             \n*/\n");
-    return file_pos;
 }
 
 void generate_tail(FILE *file){
@@ -628,31 +630,14 @@ void execute_semantic_rule(FILE *file, int rule,
         std::stack<TOKEN>& SEMANTIC_STACK,
         std::unordered_map<std::string, TOKEN>& SYMBOLS_TABLE,
         std::stack<std::string>& print_buffer,
-        std::stack<TOKEN>& TEMP_VAR_TO_PRINT,
+        std::queue<TOKEN>& TEMP_VAR_TO_PRINT,
         long file_pos) {
     TOKEN stack_top_value;
     TOKEN last_type;
     TOKEN opm_to_print;
-    static int temp_var_count = 0;
-    long end_of_file;
+    static int temp_var_count = -1;
 
     switch (rule) {
-    case 0: 
-        end_of_file = ftell(file);
-        fseek(file, file_pos, SEEK_SET);
-        fprintf(file, "print aqui\n");
-        fprintf(file, "print aqui\n");
-        fprintf(file, "print aqui\n");
-        fprintf(file, "print aqui\n");
-        // while (!TEMP_VAR_TO_PRINT.empty()) {
-        //     TOKEN token_tmp = TEMP_VAR_TO_PRINT.top();
-        //     TEMP_VAR_TO_PRINT.pop();
-        //     fprintf(file, "\t%s %s;\n", token_tmp.type.c_str(), token_tmp.lexema.c_str());
-        // }
-        fseek(file, end_of_file, SEEK_SET);
-    case 5:
-        printf("\n\n%ld\n\n", file_pos);
-        break;
     case 6:
         SEMANTIC_STACK.pop();
         last_type = SEMANTIC_STACK.top();
@@ -713,7 +698,7 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             if(!result_from_table->second.type.compare("Nulo")) {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                has_error = true;
+                // has_error = true;
             }
             else if (!result_from_table->second.type.compare("int")) {
                 fprintf(file, "\tscanf(\"%%d\", &%s);\n", result_from_table->second.lexema.c_str());
@@ -755,7 +740,7 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             if(!result_from_table->second.type.compare("Nulo")) {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                has_error = true;
+                // has_error = true;
             }
             else  {
                 SEMANTIC_STACK.push(make_token_with_type(result_from_table->second.lexema, "ARG", result_from_table->second.type.c_str()));
@@ -772,13 +757,13 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(last_type.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             if(!result_from_table->second.type.compare("Nulo")) {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                has_error = true;
+                // has_error = true;
             }
             else  {
                 if (!stack_top_value.type.compare(result_from_table->second.type.c_str())) {
                     if(stack_top_value.type.compare("literal") == 0) {
                         printf("Erro: atribuicao de literal - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                        has_error = true;
+                        // has_error = true;
                     }
                     else {
                         fprintf(file, "\t%s = %s;\n", result_from_table->second.lexema.c_str(), stack_top_value.lexema.c_str());
@@ -816,16 +801,14 @@ void execute_semantic_rule(FILE *file, int rule,
             else last_type = result_from_table->second;
         }
 
-        if (!last_type.type.compare(stack_top_value.type)) {
+        if (last_type.type.compare(stack_top_value.type.c_str())) {
             printf("Erro: Tipos deiferentes para atribuicao - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
         }
         else {
             SEMANTIC_STACK.push(make_token_with_type("T"+std::to_string(temp_var_count), "TEMP_VAR", stack_top_value.type.c_str()));
-            // TEMP_VAR_TO_PRINT.push(make_token_with_type("T"+std::to_string(temp_var_count), "TEMP_VAR", stack_top_value.type.c_str()));
+            TEMP_VAR_TO_PRINT.push(make_token_with_type("T"+std::to_string(temp_var_count), "TEMP_VAR", stack_top_value.type.c_str()));
+            fprintf(file, "\tT%d = %s %s %s;\n", temp_var_count, last_type.lexema.c_str(), opm_to_print.lexema.c_str(), stack_top_value.lexema.c_str());
         }
-        
-
-        
         break;
     case 21:
         stack_top_value = SEMANTIC_STACK.top();
@@ -838,7 +821,7 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             if (!result_from_table->second.type.compare("Nulo")) {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                has_error = true;
+                // has_error = true;
             }
             else {
                 SEMANTIC_STACK.push(make_token_with_type(result_from_table->second.lexema.c_str(), result_from_table->second.token_class.c_str(), result_from_table->second.type.c_str()));
@@ -855,14 +838,21 @@ void execute_semantic_rule(FILE *file, int rule,
             SEMANTIC_STACK.push(make_token_with_type(stack_top_value.lexema.c_str(), stack_top_value.token_class.c_str(), "int"));
         }
         break;
-    case 24:
-        printf("A -> COND A\n");
-        break;
     case 25:
-        printf("COND -> CAB CP\n");
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.push(make_token_with_type("COND", "COND", "COND"));
+        fprintf(file, "\t}\n");
         break;
     case 26:
-        printf("CAB -> se ab_p EXP_R fc_p entao\n");
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.pop();
+        stack_top_value = SEMANTIC_STACK.top();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.pop();
+        SEMANTIC_STACK.push(make_token_with_type("CAB", "CAB", "CAB"));
+        fprintf(file, "\tif (%s) {\n", stack_top_value.lexema.c_str());
         break;
     case 27:
         printf("EXP_R -> OPRD opr OPRD\n");
@@ -894,6 +884,7 @@ void execute_semantic_rule(FILE *file, int rule,
     default:   
         if(rule > 39){
             printf("ERRO SINTATICO!!!!\n");
+            // has_error = true;
         }
         break;
     }
@@ -930,4 +921,39 @@ TOKEN findLastType(std::stack<TOKEN> &SEMANTIC_STACK, std::string type) {
 
 bool is_real(std::string str) {
     return str.find('.') != std::string::npos || str.find('e') != std::string::npos || str.find('E') != std::string::npos;
+}
+    
+void create_obj(bool has_error, std::queue<TOKEN>& TEMP_VAR_TO_PRINT) {
+    if (has_error) {
+        printf("\n\nOBJ NAO GERADO PORQUE CONTEM ERRO!!\n\n");
+    }
+    else {
+        FILE *file_obj;
+        FILE *file_tmp;
+
+        std::ifstream filein("./target/tmp.c");
+        std::ofstream fileout("./target/output.c");
+
+        std::string str_tmp; 
+        while (std::getline(filein, str_tmp)) {
+            if(!str_tmp.compare("void main(void) {")) {
+                fileout << str_tmp;
+                fileout << "\n/*----Variaveis temporarias----*/\n";
+                while (!TEMP_VAR_TO_PRINT.empty()) {
+                    TOKEN token = TEMP_VAR_TO_PRINT.front();
+                    TEMP_VAR_TO_PRINT.pop();
+                    fileout << "\t";
+                    fileout << token.type.c_str();
+                    fileout << " ";
+                    fileout << token.lexema.c_str();
+                    fileout << ";\n";
+                }
+                fileout << "/*-----------------------------*/\n";
+            }
+            else {
+                str_tmp += "\n";
+                fileout << str_tmp;
+            }
+        }
+    }
 }
