@@ -239,7 +239,7 @@ int main(int argc, char* argv[]){
     create_obj(has_error, TEMP_VAR_TO_PRINT);
     std::remove("./target/tmp.c");
 
-        return 0;
+    return 0;
 }
 
 void init_symbols_table(std::unordered_map<std::string, TOKEN>* SYMBOLS_TABLE){
@@ -705,7 +705,7 @@ void execute_semantic_rule(FILE *file, int rule,
                 fprintf(file, "\tscanf(\"%%d\", &%s);\n", result_from_table->second.lexema.c_str());
             }
             else if (!result_from_table->second.type.compare("double")) {
-                fprintf(file, "\tscanf(\"%%ld\", &%s);\n", result_from_table->second.lexema.c_str());
+                fprintf(file, "\tscanf(\"%%lf\", &%s);\n", result_from_table->second.lexema.c_str());
             }
             else if (!result_from_table->second.type.compare("literal")) {
                 fprintf(file, "\tscanf(\"%%s\", %s);\n", result_from_table->second.lexema.c_str());
