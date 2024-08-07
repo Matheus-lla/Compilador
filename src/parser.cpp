@@ -118,7 +118,7 @@ int main(int argc, char* argv[]){
                 printf("\nERRO!!!! - stack_top: %d - token_class_value: %d\ntoken: |%s| |%s| |%s| - linha: %d - coluna: %d\n\n",
                        stack_top, token_class_value, token.lexema.c_str(), token.token_class.c_str(), token.type.c_str(), token.linha, token.coluna);
                 error_detected = true;
-                // has_error = true;
+                has_error = true;
 
                 bool token_replaced = false;
                 if (EXPECTED_TOKENS.find(stack_top) != EXPECTED_TOKENS.end()) {
@@ -609,7 +609,7 @@ void print_grammar_rule(int reduce) {
         break;
     default:
         printf("ERRO SINTATICO!!!!\n");
-        // has_error = true;
+        has_error = true;
         break;
     }
 }
@@ -699,7 +699,7 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             if(!result_from_table->second.type.compare("Nulo")) {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                // has_error = true;
+                has_error = true;
             }
             else if (!result_from_table->second.type.compare("int")) {
                 fprintf(file, "\tscanf(\"%%d\", &%s);\n", result_from_table->second.lexema.c_str());
@@ -743,7 +743,7 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             if(!result_from_table->second.type.compare("Nulo")) {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                // has_error = true;
+                has_error = true;
             }
             else  {
                 SEMANTIC_STACK.push(make_token_with_type(result_from_table->second.lexema, "ARG", result_from_table->second.type.c_str()));
@@ -761,13 +761,13 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(last_type.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             if(!result_from_table->second.type.compare("Nulo")) {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                // has_error = true;
+                has_error = true;
             }
             else  {
                 if (!stack_top_value.type.compare(result_from_table->second.type.c_str())) {
                     if(stack_top_value.type.compare("literal") == 0) {
                         printf("Erro: atribuicao de literal - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                        // has_error = true;
+                        has_error = true;
                     }
                     else {
                         fprintf(file, "\t%s = %s;\n", result_from_table->second.lexema.c_str(), stack_top_value.lexema.c_str());
@@ -775,7 +775,7 @@ void execute_semantic_rule(FILE *file, int rule,
                 }
                 else {
                     printf("Erro: Tipos deiferentes para atribuicao - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                    // has_error = true;
+                    has_error = true;
                 }
             }
         }
@@ -795,7 +795,7 @@ void execute_semantic_rule(FILE *file, int rule,
             }
             else {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                // has_error = true;
+                has_error = true;
             }
         }
         if (!last_type.token_class.compare("ID")) {
@@ -804,7 +804,7 @@ void execute_semantic_rule(FILE *file, int rule,
             }
             else {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                // has_error = true;
+                has_error = true;
             }
         }
 
@@ -829,7 +829,7 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             if (!result_from_table->second.type.compare("Nulo")) {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                // has_error = true;
+                has_error = true;
             }
             else {
                 SEMANTIC_STACK.push(make_token_with_type(result_from_table->second.lexema.c_str(), 
@@ -879,7 +879,7 @@ void execute_semantic_rule(FILE *file, int rule,
             }
             else {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                // has_error = true;
+                has_error = true;
             }
         }
         if (!last_type.token_class.compare("ID")) {
@@ -888,13 +888,13 @@ void execute_semantic_rule(FILE *file, int rule,
             }
             else {
                 printf("Erro: Variável não declarada - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-                // has_error = true;
+                has_error = true;
             }
         }
 
         if (last_type.type.compare(stack_top_value.type.c_str())) {
             printf("Erro: Tipos deiferentes para atribuicao - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
-            // has_error = true;
+            has_error = true;
         }
         else {
             SEMANTIC_STACK.push(make_token_with_type("T" + std::to_string(temp_var_count), "TEMP_VAR", stack_top_value.type.c_str()));
@@ -920,7 +920,7 @@ void execute_semantic_rule(FILE *file, int rule,
     default: 
         if(rule > 39){
             printf("ERRO SEMANTICO!!!!\n");
-            // has_error = true;
+            has_error = true;
         }
         break;
     }
