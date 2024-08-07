@@ -50,13 +50,13 @@ TOKEN SCANNER(FILE *file){
     token.coluna = coluna - 1;
 
     if(feof(file) && STATE == 10) {
-        printf("ERRO LEXICO - Comentario nao fechado, linha: %d, coluna: %d\n", linha, coluna + 2);
+        printf("ERRO LEXICO - Comentario nao fechado\n");
     } else {
         if (feof(file) && token.lexema.compare("") == 0) {
             token = make_token((char*) "$", 15);
         }
         else if(token.token_class == TOKEN_CLASS[12]) {
-            printf("ERRO LEXICO - Caracter invalido na linguagem |%s|, linha: %d, coluna: %d\n", token.lexema.c_str(), linha, coluna + 2);
+            printf("ERRO LEXICO - Caracter invalido na linguagem |%s|\n", token.lexema.c_str());
         }
     }
 
