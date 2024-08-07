@@ -659,7 +659,6 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             result_from_table->second.type = last_type.type;
         }
-        // fprintf(file, ", %s", SEMANTIC_STACK.top().lexema.c_str());
         print_buffer.push(("\t"+last_type.type+" "+SEMANTIC_STACK.top().lexema+";\n"));
         SEMANTIC_STACK.pop();
         SEMANTIC_STACK.push(make_token_with_type("L", "L", last_type.type.c_str()));
@@ -670,7 +669,6 @@ void execute_semantic_rule(FILE *file, int rule,
         if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
             result_from_table->second.type = last_type.type;
         }
-        // fprintf(file, ("\t"+last_type.type+" "+SEMANTIC_STACK.top().lexema+"\n").c_str());
         print_buffer.push(("\t"+last_type.type+" "+SEMANTIC_STACK.top().lexema+";\n"));
         SEMANTIC_STACK.pop();
         SEMANTIC_STACK.push(make_token_with_type("L", "L", last_type.type.c_str()));
@@ -713,7 +711,6 @@ void execute_semantic_rule(FILE *file, int rule,
         }
         break;
     case 14:
-        // talvez ajustar isso aqui pra imprimir os valores certos dos ids
         SEMANTIC_STACK.pop();
         stack_top_value  = SEMANTIC_STACK.top();
         SEMANTIC_STACK.pop();
@@ -813,17 +810,18 @@ void execute_semantic_rule(FILE *file, int rule,
             has_error = true;
         }
         else {
-            SEMANTIC_STACK.push(make_token_with_type("T"+std::to_string(temp_var_count), "TEMP_VAR", stack_top_value.type.c_str()));
-            TEMP_VAR_TO_PRINT.push(make_token_with_type("T"+std::to_string(temp_var_count), "TEMP_VAR", stack_top_value.type.c_str()));
+            SEMANTIC_STACK.push(make_token_with_type("T" + std::to_string(temp_var_count), "TEMP_VAR", stack_top_value.type.c_str()));
+            TEMP_VAR_TO_PRINT.push(make_token_with_type("T" + std::to_string(temp_var_count), "TEMP_VAR", stack_top_value.type.c_str()));
             fprintf(file, "\tT%d = %s %s %s;\n", temp_var_count, last_type.lexema.c_str(), opm_to_print.lexema.c_str(), stack_top_value.lexema.c_str());
         }
         break;
-    case 21:
+    case 21: 
         stack_top_value = SEMANTIC_STACK.top();
         SEMANTIC_STACK.pop();
         SEMANTIC_STACK.push(make_token_with_type(stack_top_value.lexema.c_str(), stack_top_value.token_class.c_str(), stack_top_value.type.c_str()));
         break;
     case 22:
+
         stack_top_value = SEMANTIC_STACK.top();
         SEMANTIC_STACK.pop();
         if (auto result_from_table = SYMBOLS_TABLE.find(stack_top_value.lexema); result_from_table != SYMBOLS_TABLE.end()) {
