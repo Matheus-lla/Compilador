@@ -806,7 +806,7 @@ void execute_semantic_rule(FILE *file, int rule,
         }
 
         if (last_type.type.compare(stack_top_value.type.c_str())) {
-            printf("Erro: Tipos diferentes para atribuicao - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
+            printf("Erro: Operandos com tipos incompatíveis - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
             has_error = true;
         }
         else {
@@ -891,7 +891,7 @@ void execute_semantic_rule(FILE *file, int rule,
         }
 
         if (last_type.type.compare(stack_top_value.type.c_str())) {
-            printf("Erro: Tipos deiferentes para atribuicao - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
+            printf("Erro:  Operandos com tipos incompatíveis - linha: %d, coluna: %d\n", stack_top_value.linha, stack_top_value.coluna);
             has_error = true;
         }
         else {
